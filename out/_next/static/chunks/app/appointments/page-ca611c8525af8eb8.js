@@ -53,7 +53,7 @@
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
- */let x=(0,p.Z)("ChevronLeft",[["path",{d:"m15 18-6-6 6-6",key:"1wnfg3"}]]);var u=t(1061);/**
+ */let x=(0,p.Z)("ChevronLeft",[["path",{d:"m15 18-6-6 6-6",key:"1wnfg3"}]]);var u=t(7307);/**
  * @license lucide-react v0.312.0 - ISC
  *
  * This source code is licensed under the ISC license.

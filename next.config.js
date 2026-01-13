@@ -6,7 +6,7 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: '/beauty-center-demo',
-  assetPrefix: '/beauty-center-demo/',
+  assetPrefix: '/beauty-center-demo',
 }
 
 module.exports = nextConfig
