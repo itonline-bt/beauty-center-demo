@@ -23,7 +23,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { if (isAuthenticated) router.push('/dashboard'); }, [isAuthenticated, router]);
+  const [hydrated, setHydrated] = useState(false);
+
+  // รอ zustand hydrate
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  // redirect หลัง hydrate เท่านั้น
+  useEffect(() => {
+    if (!hydrated) return;
+
+    if (isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [hydrated, isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
