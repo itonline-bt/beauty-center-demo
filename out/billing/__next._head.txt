@@ -1,0 +1,5 @@
+1:"$Sreact.fragment"
+2:I[7508,["/_next/static/chunks/8a2300417e85770c.js","/_next/static/chunks/e9f56e87908ca8f4.js"],"ViewportBoundary"]
+3:I[7508,["/_next/static/chunks/8a2300417e85770c.js","/_next/static/chunks/e9f56e87908ca8f4.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"cuZ959JMhDWMbtO_iCY0-","rsc":["$","$1","h",{"children":[null,["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Beauty Center - Demo"}],["$","meta","1",{"name":"description","content":"Beauty Salon Management System Demo"}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}
