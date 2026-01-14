@@ -1,13 +1,13 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { I18nProvider } from '@/contexts/I18nContext';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Beauty Center - Demo',
-  description: 'Beauty Salon Management System Demo',
+  title: "Beauty Center - Demo",
+  description: "Beauty Salon Management System Demo",
 };
 
 export default function RootLayout({
@@ -18,9 +18,7 @@ export default function RootLayout({
   return (
     <html lang="lo">
       <body className={inter.className}>
-        <I18nProvider>
-          {children}
-        </I18nProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
