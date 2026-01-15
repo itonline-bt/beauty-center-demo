@@ -6,14 +6,13 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, SearchInput, StatCard, EmptyState } from '@/components/ui';
-import { formatCurrency } from '@/lib/utils';
 import { Receipt, Plus, Printer, Eye, DollarSign, Clock, CheckCircle, CreditCard, Banknote, Building } from 'lucide-react';
 
 export default function BillingPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { bills, appointments, customers, services, settings, addTransaction } = useDataStore();
-  const { locale } = useI18n();
+  const { locale, formatCurrency, currency, setCurrency, availableCurrencies, getCurrencyConfig } = useI18n();
   
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -37,7 +36,7 @@ export default function BillingPage() {
     total: bills.length,
     paid: bills.filter(b => b.payment_status === 'paid').length,
     pending: bills.filter(b => b.payment_status === 'pending').length,
-    revenue: bills.filter(b => b.payment_status === 'paid').reduce((s, b) => s + b.total_amount, 0),
+    revenue: bills.filter(b => b.payment_status === 'paid').reduce((s, b) => s + (b.grand_total || b.total_amount || 0), 0),
   }), [bills]);
 
   const completedAppointments = appointments.filter(a => a.status === 'completed');
@@ -63,9 +62,21 @@ export default function BillingPage() {
           title={locale === 'lo' ? 'ໃບບິນ' : 'Billing'}
           subtitle={locale === 'lo' ? 'ຈັດການໃບບິນ ແລະ ການຊຳລະເງິນ' : 'Manage invoices and payments'}
           action={
-            <Button icon={<Plus className="w-5 h-5" />} onClick={() => setShowCreateModal(true)}>
-              {locale === 'lo' ? 'ສ້າງໃບບິນໃໝ່' : 'Create Invoice'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <select 
+                value={currency} 
+                onChange={(e) => setCurrency(e.target.value as any)}
+                className="px-3 py-2 border rounded-lg bg-white text-sm"
+              >
+                {availableCurrencies.map((curr) => {
+                  const config = getCurrencyConfig(curr);
+                  return <option key={curr} value={curr}>{config.symbol} {curr}</option>;
+                })}
+              </select>
+              <Button icon={<Plus className="w-5 h-5" />} onClick={() => setShowCreateModal(true)}>
+                {locale === 'lo' ? 'ສ້າງໃບບິນໃໝ່' : 'Create Invoice'}
+              </Button>
+            </div>
           }
         />
 
@@ -110,7 +121,7 @@ export default function BillingPage() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="text-sm text-gray-500">{locale === 'lo' ? 'ຍອດລວມ' : 'Total'}</p>
-                    <p className="text-xl font-bold text-gray-900">{formatCurrency(bill.total_amount)}</p>
+                    <p className="text-xl font-bold text-gray-900">{formatCurrency(bill.grand_total || bill.total_amount || 0)}</p>
                   </div>
                   <div className="flex items-center gap-2 text-gray-500">
                     {getPaymentIcon(bill.payment_method)}
@@ -175,7 +186,7 @@ export default function BillingPage() {
               <div className="space-y-2 pt-4 border-t">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">{locale === 'lo' ? 'ຍອດລວມ' : 'Subtotal'}</span>
-                  <span>{formatCurrency(selectedBill.subtotal)}</span>
+                  <span>{formatCurrency(selectedBill.subtotal || 0)}</span>
                 </div>
                 {selectedBill.discount_amount > 0 && (
                   <div className="flex justify-between text-sm text-red-600">
@@ -184,13 +195,25 @@ export default function BillingPage() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{locale === 'lo' ? 'ອາກອນ' : 'Tax'} ({settings.tax_rate}%)</span>
-                  <span>{formatCurrency(selectedBill.tax_amount)}</span>
+                  <span className="text-gray-500">{locale === 'lo' ? 'ອາກອນ' : 'Tax'} ({selectedBill.tax_rate || settings.tax_rate}%)</span>
+                  <span>{formatCurrency(selectedBill.tax_amount || 0)}</span>
                 </div>
+                {selectedBill.deposit_amount > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>{locale === 'lo' ? 'ມັດຈຳ' : 'Deposit'}</span>
+                    <span>-{formatCurrency(selectedBill.deposit_amount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                  <span>{locale === 'lo' ? 'ຍອດສຸດທິ' : 'Total'}</span>
-                  <span className="text-rose-600">{formatCurrency(selectedBill.total_amount)}</span>
+                  <span>{locale === 'lo' ? 'ຍອດສຸດທິ' : 'Grand Total'}</span>
+                  <span className="text-rose-600">{formatCurrency(selectedBill.grand_total || selectedBill.total_amount || 0)}</span>
                 </div>
+                {selectedBill.deposit_amount > 0 && (
+                  <div className="flex justify-between text-md font-semibold">
+                    <span>{locale === 'lo' ? 'ຈ່າຍຕື່ມ' : 'Amount Due'}</span>
+                    <span className="text-rose-600">{formatCurrency(selectedBill.amount_due || 0)}</span>
+                  </div>
+                )}
               </div>
 
               {/* Payment Info */}

@@ -6,14 +6,14 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, EmptyState } from '@/components/ui';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import { TrendingUp, TrendingDown, DollarSign, Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Calendar, Banknote, Building, CreditCard } from 'lucide-react';
 
 export default function IncomeExpensePage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { transactions, expenseCategories, addTransaction, deleteTransaction, getFinancialSummary } = useDataStore();
-  const { locale } = useI18n();
+  const { locale, formatCurrency } = useI18n();
   
   const [showModal, setShowModal] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense');

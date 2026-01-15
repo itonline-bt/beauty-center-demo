@@ -333,6 +333,20 @@ export const mockSettings = {
   opening_time: '09:00',
   closing_time: '18:00',
   working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
+  // Multi-currency support
+  currencies: {
+    LAK: { symbol: '₭', name: 'Lao Kip', name_lo: 'ກີບ', rate: 1, decimals: 0 },
+    THB: { symbol: '฿', name: 'Thai Baht', name_lo: 'ບາດ', rate: 0.0023, decimals: 2 },
+    USD: { symbol: '$', name: 'US Dollar', name_lo: 'ໂດລາ', rate: 0.000047, decimals: 2 },
+    CNY: { symbol: '¥', name: 'Chinese Yuan', name_lo: 'ຢວນ', rate: 0.00034, decimals: 2 },
+  },
+  exchange_rates: {
+    LAK: 1,
+    THB: 435,      // 1 THB = 435 LAK
+    USD: 21250,    // 1 USD = 21,250 LAK  
+    CNY: 2940,     // 1 CNY = 2,940 LAK
+  },
+  deposit_percentage: 30, // Default deposit percentage
 };
 
 export const getDashboardStats = () => {

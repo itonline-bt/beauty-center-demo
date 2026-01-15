@@ -6,14 +6,14 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, SearchInput, StatCard, Alert } from '@/components/ui';
-import { formatCurrency, formatNumber, getProductImageUrl } from '@/lib/utils';
+import { formatNumber, getProductImageUrl } from '@/lib/utils';
 import { Plus, Package, Edit2, Trash2, AlertTriangle, DollarSign, BarChart2, Image as ImageIcon, Upload, X, Camera } from 'lucide-react';
 
 export default function InventoryPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { inventory, inventoryCategories, addInventoryItem, updateInventoryItem, deleteInventoryItem, updateInventoryImage } = useDataStore();
-  const { locale, t } = useI18n();
+  const { locale, t, formatCurrency } = useI18n();
   
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');

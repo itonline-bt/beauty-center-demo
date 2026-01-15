@@ -6,14 +6,13 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, PageHeader, SearchInput, EmptyState, StatCard } from '@/components/ui';
-import { formatCurrency } from '@/lib/utils';
 import { Plus, User, Phone, Mail, Edit2, Trash2, Star, Calendar, DollarSign, Users } from 'lucide-react';
 
 export default function CustomersPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { customers, appointments, addCustomer, updateCustomer, deleteCustomer } = useDataStore();
-  const { locale, t } = useI18n();
+  const { locale, t, formatCurrency } = useI18n();
   
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);

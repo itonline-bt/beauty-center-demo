@@ -6,14 +6,13 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, SearchInput, EmptyState, StatCard } from '@/components/ui';
-import { formatCurrency } from '@/lib/utils';
 import { Plus, Scissors, Clock, Edit2, Trash2, Tag, TrendingUp, DollarSign, Grid } from 'lucide-react';
 
 export default function ServicesPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { services, serviceCategories, appointments, addService, updateService, deleteService } = useDataStore();
-  const { locale, t } = useI18n();
+  const { locale, t, formatCurrency } = useI18n();
   
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');

@@ -28,7 +28,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { notifications } = useDataStore();
-  const { locale, setLocale } = useI18n();
+  const { locale, setLocale, currency, setCurrency, availableCurrencies, getCurrencyConfig } = useI18n();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -68,6 +68,22 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
             <button onClick={() => setLocale('lo')} className={`px-2 py-1 text-xs font-medium rounded transition-all ${locale === 'lo' ? 'bg-white shadow text-rose-600' : 'text-gray-500'}`}>🇱🇦</button>
             <button onClick={() => setLocale('en')} className={`px-2 py-1 text-xs font-medium rounded transition-all ${locale === 'en' ? 'bg-white shadow text-rose-600' : 'text-gray-500'}`}>🇬🇧</button>
           </div>
+
+          {/* Currency Selector */}
+          <select 
+            value={currency} 
+            onChange={(e) => setCurrency(e.target.value as any)}
+            className="px-2 py-1.5 text-xs font-medium bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-rose-500"
+          >
+            {availableCurrencies.map((curr) => {
+              const config = getCurrencyConfig(curr);
+              return (
+                <option key={curr} value={curr}>
+                  {config.symbol} {curr}
+                </option>
+              );
+            })}
+          </select>
 
           {/* Notifications */}
           <div className="relative">

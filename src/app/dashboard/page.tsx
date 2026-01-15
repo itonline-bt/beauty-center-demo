@@ -7,14 +7,14 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Badge, StatCard } from '@/components/ui';
-import { formatCurrency, formatNumber, getStatusText, getProductImageUrl } from '@/lib/utils';
+import { formatNumber, getStatusText, getProductImageUrl } from '@/lib/utils';
 import { Calendar, Users, DollarSign, AlertTriangle, Clock, TrendingUp, Scissors, Package, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { appointments, customers, services, inventory, bills, getDashboard } = useDataStore();
-  const { locale, t } = useI18n();
+  const { locale, t, formatCurrency } = useI18n();
 
   useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
   if (!isAuthenticated) return null;

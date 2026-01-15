@@ -6,7 +6,6 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Badge, PageHeader, StatCard } from '@/components/ui';
-import { formatCurrency } from '@/lib/utils';
 import { TrendingUp, TrendingDown, DollarSign, Calendar, PieChart, BarChart2, Users, Scissors, Package, FileText, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,7 +13,7 @@ export default function ReportsPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { transactions, appointments, customers, services, inventory, bills, getFinancialSummary } = useDataStore();
-  const { locale } = useI18n();
+  const { locale, formatCurrency } = useI18n();
   
   const [period, setPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
 

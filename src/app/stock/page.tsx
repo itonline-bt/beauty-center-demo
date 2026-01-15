@@ -6,14 +6,14 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, PageHeader, SearchInput, Alert, StatCard } from '@/components/ui';
-import { formatCurrency, formatNumber, getProductImageUrl } from '@/lib/utils';
+import { formatNumber, getProductImageUrl } from '@/lib/utils';
 import { Package, Plus, Minus, AlertTriangle, ArrowUp, ArrowDown, History, Bell } from 'lucide-react';
 
 export default function StockPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const { inventory, stockMovements, adjustStock } = useDataStore();
-  const { locale } = useI18n();
+  const { locale, formatCurrency } = useI18n();
   
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
