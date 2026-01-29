@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
-import { Sparkles, Mail, Lock, Eye, EyeOff, User, Shield, Users } from 'lucide-react';
+import { Sparkles, Mail, Lock, Eye, EyeOff, User, Shield, Users, Building2 } from 'lucide-react';
 
 const demoAccounts = [
-  { email: 'admin@demo.com', role: 'admin', icon: Shield, color: 'from-rose-500 to-red-600' },
-  { email: 'manager@demo.com', role: 'manager', icon: User, color: 'from-blue-500 to-indigo-600' },
-  { email: 'staff@demo.com', role: 'staff', icon: Users, color: 'from-gray-400 to-gray-600' },
+  { email: 'admin@demo.com', role: 'admin', icon: Shield, color: 'from-rose-500 to-red-600', desc_lo: 'ເຂົ້າເຖິງທຸກສາຂາ', desc_en: 'All branches' },
+  { email: 'manager@demo.com', role: 'manager', icon: User, color: 'from-blue-500 to-indigo-600', desc_lo: '2 ສາຂາ', desc_en: '2 branches' },
+  { email: 'staff@demo.com', role: 'staff', icon: Users, color: 'from-gray-400 to-gray-600', desc_lo: '1 ສາຂາ', desc_en: '1 branch' },
 ];
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, currentBranch } = useAuthStore();
   const { locale, setLocale } = useI18n();
   
   const [email, setEmail] = useState('');
@@ -22,30 +22,31 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
   const [hydrated, setHydrated] = useState(false);
 
-  // รอ zustand hydrate
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+  useEffect(() => { setHydrated(true); }, []);
 
-  // redirect หลัง hydrate เท่านั้น
   useEffect(() => {
     if (!hydrated) return;
-
     if (isAuthenticated) {
-      router.replace("/dashboard");
+      if (!currentBranch) {
+        router.replace("/select-branch");
+      } else {
+        router.replace("/dashboard");
+      }
     }
-  }, [hydrated, isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, currentBranch, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     const success = await login(email, password);
-    if (success) router.push('/dashboard');
-    else setError(locale === 'lo' ? 'ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ' : 'Invalid email or password');
+    if (success) {
+      router.push('/select-branch');
+    } else {
+      setError(locale === 'lo' ? 'ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ' : 'Invalid email or password');
+    }
     setLoading(false);
   };
 
@@ -63,7 +64,18 @@ export default function LoginPage() {
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">{locale === 'lo' ? 'ລະບົບຈັດການຮ້ານເສີມສວຍ' : 'Beauty Salon Management System'}</h1>
           <p className="text-rose-100 text-lg">{locale === 'lo' ? 'ຈັດການນັດໝາຍ, ລູກຄ້າ, ບໍລິການ, ແລະ ສິນຄ້າຄົງຄັງຢ່າງງ່າຍດາຍ' : 'Easily manage appointments, customers, services, and inventory'}</p>
-          <div className="grid grid-cols-2 gap-4 pt-6">
+          
+          <div className="bg-white/10 backdrop-blur rounded-xl p-4 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-white font-medium">{locale === 'lo' ? 'ຮອງຮັບຫຼາຍສາຂາ' : 'Multi-Branch Support'}</p>
+              <p className="text-rose-200 text-sm">{locale === 'lo' ? 'ຈັດການຫຼາຍສາຂາໃນລະບົບດຽວ' : 'Manage multiple locations'}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 pt-2">
             {[{ icon: '📅', label: locale === 'lo' ? 'ນັດໝາຍ' : 'Appointments' }, { icon: '👥', label: locale === 'lo' ? 'ລູກຄ້າ' : 'Customers' }, { icon: '💅', label: locale === 'lo' ? 'ບໍລິການ' : 'Services' }, { icon: '📦', label: locale === 'lo' ? 'ສິນຄ້າ' : 'Inventory' }].map((item) => (
               <div key={item.label} className="flex items-center gap-3 bg-white/10 backdrop-blur rounded-xl p-4">
                 <span className="text-2xl">{item.icon}</span><span className="text-white font-medium">{item.label}</span>
@@ -100,7 +112,9 @@ export default function LoginPage() {
             <div className="grid grid-cols-3 gap-2">
               {demoAccounts.map((account) => (
                 <button key={account.email} onClick={() => quickLogin(account)} className={`p-3 rounded-xl bg-gradient-to-br ${account.color} text-white hover:opacity-90 transition-all hover:scale-105`}>
-                  <account.icon className="w-5 h-5 mx-auto mb-1" /><span className="text-xs font-medium capitalize">{account.role}</span>
+                  <account.icon className="w-5 h-5 mx-auto mb-1" />
+                  <span className="text-xs font-medium capitalize block">{account.role}</span>
+                  <span className="text-[10px] opacity-80">{locale === 'lo' ? account.desc_lo : account.desc_en}</span>
                 </button>
               ))}
             </div>

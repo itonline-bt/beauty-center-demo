@@ -35,11 +35,12 @@ import {
   Percent,
   Calculator,
   ShoppingBag,
+  Building2,
 } from "lucide-react";
 
 export default function BillingPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
   const {
     bills,
     appointments,
@@ -81,50 +82,64 @@ export default function BillingPage() {
     note: "",
   });
 
+  // Filter by branch
+  const branchBills = useMemo(() => {
+    if (!currentBranch || !bills) return [];
+    return bills.filter((b: any) => b.branch_id === currentBranch.id || !b.branch_id);
+  }, [bills, currentBranch]);
+
+  const branchAppointments = useMemo(() => {
+    if (!currentBranch || !appointments) return [];
+    return appointments.filter((a: any) => a.branch_id === currentBranch.id || !a.branch_id);
+  }, [appointments, currentBranch]);
+
+  const branchCustomers = useMemo(() => {
+    if (!currentBranch || !customers) return [];
+    return customers.filter((c: any) => c.branch_id === currentBranch.id || !c.branch_id);
+  }, [customers, currentBranch]);
+
   // Filtered bills
   const filtered = useMemo(() => {
-    if (!bills) return [];
-    return bills.filter((b) => {
+    return branchBills.filter((b: any) => {
       const matchSearch =
         b.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
         b.bill_number?.includes(search);
       const matchStatus = !statusFilter || b.payment_status === statusFilter;
       return matchSearch && matchStatus;
     });
-  }, [bills, search, statusFilter]);
+  }, [branchBills, search, statusFilter]);
 
   // Stats
   const stats = useMemo(
     () => ({
-      total: bills?.length || 0,
-      paid: bills?.filter((b) => b.payment_status === "paid").length || 0,
-      pending: bills?.filter((b) => b.payment_status === "pending").length || 0,
-      revenue:
-        bills
-          ?.filter((b) => b.payment_status === "paid")
-          .reduce((s, b) => s + (b.grand_total || b.total_amount || 0), 0) || 0,
+      total: branchBills.length,
+      paid: branchBills.filter((b: any) => b.payment_status === "paid").length,
+      pending: branchBills.filter((b: any) => b.payment_status === "pending").length,
+      revenue: branchBills
+        .filter((b: any) => b.payment_status === "paid")
+        .reduce((s: number, b: any) => s + (b.grand_total || b.total_amount || 0), 0),
     }),
-    [bills],
+    [branchBills],
   );
 
-  // Completed appointments not yet billed
+  // Completed appointments not yet billed (status can be 'done' or 'completed')
   const completedAppointments = useMemo(() => {
-    if (!bills || !appointments) return [];
-    const billedAppointmentIds = bills
-      .map((b) => b.appointment_id)
+    const billedAppointmentIds = branchBills
+      .map((b: any) => b.appointment_id)
       .filter(Boolean);
-    return appointments.filter(
-      (a) => a.status === "completed" && !billedAppointmentIds.includes(a.id),
+    return branchAppointments.filter(
+      (a: any) => (a.status === "completed" || a.status === "done") && !billedAppointmentIds.includes(a.id),
     );
-  }, [appointments, bills]);
+  }, [branchAppointments, branchBills]);
 
   // Auth redirect
   useEffect(() => {
     if (!isAuthenticated) router.push("/login");
-  }, [isAuthenticated, router]);
+    else if (!currentBranch) router.push("/select-branch");
+  }, [isAuthenticated, currentBranch, router]);
 
   // Early return AFTER all hooks
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || !currentBranch) return null;
 
   // Calculate totals for manual mode
   const calculateTotals = () => {
@@ -358,6 +373,13 @@ export default function BillingPage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === "lo" ? "ສາຂາ:" : "Branch:"}</span>
+          <span className="font-medium text-rose-600">{locale === "lo" ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader
           title={locale === "lo" ? "ໃບບິນ" : "Billing"}
           subtitle={
@@ -580,7 +602,7 @@ export default function BillingPage() {
           size="lg"
         >
           {createStep === "form" ? (
-            <div className="space-y-5 p-6 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-5">
               {/* Mode Selector */}
               <div className="grid grid-cols-2 gap-3">
                 <button

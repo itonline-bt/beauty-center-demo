@@ -7,11 +7,11 @@ import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, EmptyState } from '@/components/ui';
 import { formatNumber } from '@/lib/utils';
-import { TrendingUp, TrendingDown, DollarSign, Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Calendar, Banknote, Building, CreditCard } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Calendar, Banknote, Building, CreditCard, Building2 } from 'lucide-react';
 
 export default function IncomeExpensePage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
   const { transactions, expenseCategories, addTransaction, deleteTransaction, getFinancialSummary } = useDataStore();
   const { locale, formatCurrency } = useI18n();
   
@@ -24,17 +24,38 @@ export default function IncomeExpensePage() {
   });
   const [form, setForm] = useState({ category_id: '', description: '', amount: '', payment_method: 'cash', date: new Date().toISOString().split('T')[0] });
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  // Filter by branch
+  const branchTransactions = useMemo(() => {
+    if (!currentBranch) return [];
+    return transactions.filter((t: any) => t.branch_id === currentBranch.id || !t.branch_id);
+  }, [transactions, currentBranch]);
 
-  const summary = useMemo(() => getFinancialSummary(dateRange.start, dateRange.end), [dateRange, transactions, getFinancialSummary]);
+  const summary = useMemo(() => {
+    const filtered = branchTransactions.filter((t: any) => t.date >= dateRange.start && t.date <= dateRange.end);
+    const income = filtered.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + t.amount, 0);
+    const expenses = filtered.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + t.amount, 0);
+    const expenseByCategory = filtered.filter((t: any) => t.type === 'expense').reduce((acc: Record<string, number>, t: any) => {
+      acc[t.category_name] = (acc[t.category_name] || 0) + t.amount;
+      return acc;
+    }, {});
+    return { totalIncome: income, totalExpenses: expenses, netProfit: income - expenses, expenseByCategory, transactionCount: filtered.length };
+  }, [branchTransactions, dateRange]);
   
   const filteredTransactions = useMemo(() => {
-    let filtered = transactions.filter(t => t.date >= dateRange.start && t.date <= dateRange.end);
-    if (activeTab === 'income') filtered = filtered.filter(t => t.type === 'income');
-    if (activeTab === 'expense') filtered = filtered.filter(t => t.type === 'expense');
-    return filtered.sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
-  }, [transactions, dateRange, activeTab]);
+    let filtered = branchTransactions.filter((t: any) => t.date >= dateRange.start && t.date <= dateRange.end);
+    if (activeTab === 'income') filtered = filtered.filter((t: any) => t.type === 'income');
+    if (activeTab === 'expense') filtered = filtered.filter((t: any) => t.type === 'expense');
+    return filtered.sort((a: any, b: any) => b.date.localeCompare(a.date) || b.id - a.id);
+  }, [branchTransactions, dateRange, activeTab]);
+
+  // Auth redirect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +70,7 @@ export default function IncomeExpensePage() {
       date: form.date,
       created_by: user?.id || 1,
       created_by_name: user?.full_name || 'Admin',
+      branch_id: currentBranch.id,
     });
     setShowModal(false);
     setForm({ category_id: '', description: '', amount: '', payment_method: 'cash', date: new Date().toISOString().split('T')[0] });
@@ -101,6 +123,13 @@ export default function IncomeExpensePage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader
           title={locale === 'lo' ? 'ລາຍຮັບ - ລາຍຈ່າຍ' : 'Income & Expenses'}
           subtitle={locale === 'lo' ? 'ບັນທຶກລາຍຮັບ ແລະ ລາຍຈ່າຍປະຈຳວັນ' : 'Track daily income and expenses'}
@@ -123,7 +152,7 @@ export default function IncomeExpensePage() {
               <div>
                 <p className="text-sm font-medium text-gray-500">{locale === 'lo' ? 'ລາຍຮັບ' : 'Income'}</p>
                 <p className="text-2xl font-bold text-emerald-600 mt-1">+{formatCurrency(summary.totalIncome)}</p>
-                <p className="text-xs text-gray-400 mt-1">{formatNumber(transactions.filter(t => t.date >= dateRange.start && t.date <= dateRange.end && t.type === 'income').length)} {locale === 'lo' ? 'ລາຍການ' : 'transactions'}</p>
+                <p className="text-xs text-gray-400 mt-1">{formatNumber(branchTransactions.filter((t: any) => t.date >= dateRange.start && t.date <= dateRange.end && t.type === 'income').length)} {locale === 'lo' ? 'ລາຍການ' : 'transactions'}</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-emerald-600" />

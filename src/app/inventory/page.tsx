@@ -7,11 +7,11 @@ import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, SearchInput, StatCard, Alert } from '@/components/ui';
 import { formatNumber, getProductImageUrl } from '@/lib/utils';
-import { Plus, Package, Edit2, Trash2, AlertTriangle, DollarSign, BarChart2, Image as ImageIcon, Upload, X, Camera } from 'lucide-react';
+import { Plus, Package, Edit2, Trash2, AlertTriangle, DollarSign, BarChart2, Image as ImageIcon, Upload, X, Camera, Building2 } from 'lucide-react';
 
 export default function InventoryPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, currentBranch } = useAuthStore();
   const { inventory, inventoryCategories, addInventoryItem, updateInventoryItem, deleteInventoryItem, updateInventoryImage } = useDataStore();
   const { locale, t, formatCurrency } = useI18n();
   
@@ -27,27 +27,40 @@ export default function InventoryPage() {
   const [form, setForm] = useState({
     name: '', name_lo: '', category_id: '', sku: '',
     quantity: '', min_quantity: '', cost_price: '', sell_price: '',
-    unit: 'piece', supplier: '', location: '', image_url: ''
+    unit: 'piece', supplier: '', location: '', image_url: '', branch_id: 0
   });
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  // Filter inventory by current branch (with null safety and backward compatibility)
+  const branchInventory = useMemo(() => {
+    if (!currentBranch) return [];
+    // Include items with matching branch_id OR items without branch_id (legacy data)
+    return inventory.filter(i => i.branch_id === currentBranch.id || !i.branch_id);
+  }, [inventory, currentBranch]);
 
   const filtered = useMemo(() => {
-    return inventory.filter(i => {
+    return branchInventory.filter(i => {
       const matchSearch = i.name.toLowerCase().includes(search.toLowerCase()) || (i.sku && i.sku.toLowerCase().includes(search.toLowerCase()));
       const matchCategory = !categoryFilter || i.category_id === Number(categoryFilter);
       const matchStock = !stockFilter || (stockFilter === 'low' && i.quantity <= i.min_quantity) || (stockFilter === 'ok' && i.quantity > i.min_quantity);
       return matchSearch && matchCategory && matchStock;
     });
-  }, [inventory, search, categoryFilter, stockFilter]);
+  }, [branchInventory, search, categoryFilter, stockFilter]);
 
   const stats = useMemo(() => {
-    const lowStock = inventory.filter(i => i.quantity <= i.min_quantity);
-    const totalValue = inventory.reduce((s, i) => s + (i.quantity * i.cost_price), 0);
-    const sellValue = inventory.reduce((s, i) => s + (i.quantity * i.sell_price), 0);
-    return { total: inventory.length, lowStock: lowStock.length, totalValue, potentialProfit: sellValue - totalValue };
-  }, [inventory]);
+    const lowStock = branchInventory.filter(i => i.quantity <= i.min_quantity);
+    const totalValue = branchInventory.reduce((s, i) => s + (i.quantity * i.cost_price), 0);
+    const sellValue = branchInventory.reduce((s, i) => s + (i.quantity * i.sell_price), 0);
+    return { total: branchInventory.length, lowStock: lowStock.length, totalValue, potentialProfit: sellValue - totalValue };
+  }, [branchInventory]);
+
+  // Auth redirect effect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const units = [
     { value: 'piece', label: locale === 'lo' ? 'ອັນ' : 'Piece' },
@@ -113,6 +126,7 @@ export default function InventoryPage() {
       supplier: form.supplier,
       location: form.location,
       image_url: form.image_url || null,
+      branch_id: currentBranch.id,
     };
     if (editItem) updateInventoryItem(editItem.id, data);
     else addInventoryItem(data);
@@ -132,11 +146,12 @@ export default function InventoryPage() {
         supplier: item.supplier || '',
         location: item.location || '',
         image_url: item.image_url || '',
+        branch_id: item.branch_id || currentBranch.id,
       });
     } else {
       setEditItem(null);
       setPreviewImage(null);
-      setForm({ name: '', name_lo: '', category_id: '', sku: '', quantity: '0', min_quantity: '5', cost_price: '', sell_price: '', unit: 'piece', supplier: '', location: '', image_url: '' });
+      setForm({ name: '', name_lo: '', category_id: '', sku: '', quantity: '0', min_quantity: '5', cost_price: '', sell_price: '', unit: 'piece', supplier: '', location: '', image_url: '', branch_id: currentBranch.id });
     }
     setShowModal(true);
   };
@@ -163,6 +178,13 @@ export default function InventoryPage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader
           title={t('inventory.title')}
           subtitle={locale === 'lo' ? 'ຈັດການສິນຄ້າຄົງຄັງ' : 'Manage inventory items'}

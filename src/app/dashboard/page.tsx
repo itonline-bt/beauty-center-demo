@@ -8,26 +8,73 @@ import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Badge, StatCard } from '@/components/ui';
 import { formatNumber, getStatusText, getProductImageUrl } from '@/lib/utils';
-import { Calendar, Users, DollarSign, AlertTriangle, Clock, TrendingUp, Scissors, Package, ArrowRight, CheckCircle } from 'lucide-react';
+import { Calendar, Users, DollarSign, AlertTriangle, Clock, TrendingUp, Scissors, Package, ArrowRight, CheckCircle, Building2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
-  const { appointments, customers, services, inventory, bills, getDashboard } = useDataStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
+  const { appointments, customers, services, inventory, bills } = useDataStore();
   const { locale, t, formatCurrency } = useI18n();
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  // Filter by branch
+  const branchAppointments = useMemo(() => {
+    if (!currentBranch) return [];
+    return appointments.filter((a: any) => a.branch_id === currentBranch.id || !a.branch_id);
+  }, [appointments, currentBranch]);
+
+  const branchCustomers = useMemo(() => {
+    if (!currentBranch) return [];
+    return customers.filter((c: any) => c.branch_id === currentBranch.id || !c.branch_id);
+  }, [customers, currentBranch]);
+
+  const branchInventory = useMemo(() => {
+    if (!currentBranch) return [];
+    return inventory.filter((i: any) => i.branch_id === currentBranch.id || !i.branch_id);
+  }, [inventory, currentBranch]);
+
+  const branchBills = useMemo(() => {
+    if (!currentBranch) return [];
+    return bills.filter((b: any) => b.branch_id === currentBranch.id || !b.branch_id);
+  }, [bills, currentBranch]);
 
   const today = new Date().toISOString().split('T')[0];
-  const dashboard = useMemo(() => getDashboard(), [appointments, bills, inventory, getDashboard]);
-  const todayAppointments = appointments.filter(a => a.appointment_date === today).sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
-  const lowStockItems = inventory.filter(i => i.quantity <= i.min_quantity).slice(0, 5);
+  const todayAppointments = useMemo(() => 
+    branchAppointments.filter((a: any) => a.appointment_date === today).sort((a: any, b: any) => a.appointment_time.localeCompare(b.appointment_time))
+  , [branchAppointments, today]);
+  
+  const lowStockItems = useMemo(() => 
+    branchInventory.filter((i: any) => i.quantity <= i.min_quantity).slice(0, 5)
+  , [branchInventory]);
+
+  // Calculate today stats
+  const todayStats = useMemo(() => {
+    const todayAppts = branchAppointments.filter((a: any) => a.appointment_date === today);
+    const todayBills = branchBills.filter((b: any) => b.created_at === today);
+    return {
+      completed: todayAppts.filter((a: any) => a.status === 'done').length,
+      pending: todayAppts.filter((a: any) => a.status === 'pending').length,
+      todayRevenue: todayBills.reduce((s: number, b: any) => s + (b.grand_total || 0), 0),
+    };
+  }, [branchAppointments, branchBills, today]);
 
   // Calculate monthly stats
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-  const monthlyRevenue = bills.filter((b: any) => b.created_at >= monthStart).reduce((s: number, b: any) => s + b.grand_total, 0);
-  const monthlyAppointments = appointments.filter(a => a.appointment_date >= monthStart && a.status === 'done').length;
+  const monthlyRevenue = useMemo(() => 
+    branchBills.filter((b: any) => b.created_at >= monthStart).reduce((s: number, b: any) => s + b.grand_total, 0)
+  , [branchBills, monthStart]);
+  
+  const monthlyAppointments = useMemo(() => 
+    branchAppointments.filter((a: any) => a.appointment_date >= monthStart && a.status === 'done').length
+  , [branchAppointments, monthStart]);
+
+  // Auth redirect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login');
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'success' | 'warning' | 'danger' | 'info' | 'default'> = { done: 'success', confirmed: 'info', in_progress: 'info', pending: 'warning', cancelled: 'danger' };
@@ -37,6 +84,13 @@ export default function DashboardPage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         {/* Welcome Header */}
         <div className="bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-1">
@@ -64,7 +118,7 @@ export default function DashboardPage() {
           />
           <StatCard 
             title={locale === 'lo' ? 'ລູກຄ້າທັງໝົດ' : 'Total Customers'} 
-            value={formatNumber(customers.length)} 
+            value={formatNumber(branchCustomers.length)} 
             icon={<Users className="w-6 h-6" />} 
             color="purple" 
           />
@@ -161,21 +215,21 @@ export default function DashboardPage() {
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
                     <span className="text-sm text-gray-600">{locale === 'lo' ? 'ສຳເລັດມື້ນີ້' : 'Completed Today'}</span>
                   </div>
-                  <span className="font-bold text-emerald-600">{formatNumber(dashboard.appointments.completed)}</span>
+                  <span className="font-bold text-emerald-600">{formatNumber(todayStats.completed)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-amber-500" />
                     <span className="text-sm text-gray-600">{locale === 'lo' ? 'ລໍຖ້າຢືນຢັນ' : 'Pending'}</span>
                   </div>
-                  <span className="font-bold text-amber-600">{formatNumber(dashboard.appointments.pending)}</span>
+                  <span className="font-bold text-amber-600">{formatNumber(todayStats.pending)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-blue-500" />
                     <span className="text-sm text-gray-600">{locale === 'lo' ? 'ລາຍຮັບມື້ນີ້' : "Today's Revenue"}</span>
                   </div>
-                  <span className="font-bold text-blue-600">{formatCurrency(dashboard.revenue.today)}</span>
+                  <span className="font-bold text-blue-600">{formatCurrency(todayStats.todayRevenue)}</span>
                 </div>
               </div>
             </Card>

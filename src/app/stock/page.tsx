@@ -7,11 +7,11 @@ import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, PageHeader, SearchInput, Alert, StatCard } from '@/components/ui';
 import { formatNumber, getProductImageUrl } from '@/lib/utils';
-import { Package, Plus, Minus, AlertTriangle, ArrowUp, ArrowDown, History, Bell } from 'lucide-react';
+import { Package, Plus, Minus, AlertTriangle, ArrowUp, ArrowDown, History, Bell, Building2 } from 'lucide-react';
 
 export default function StockPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
   const { inventory, stockMovements, adjustStock } = useDataStore();
   const { locale, formatCurrency } = useI18n();
   
@@ -21,21 +21,45 @@ export default function StockPage() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [form, setForm] = useState({ quantity: '', reason: '' });
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  // Filter inventory by current branch (with null safety and backward compatibility)
+  const branchInventory = useMemo(() => {
+    if (!currentBranch) return [];
+    // Include items with matching branch_id OR items without branch_id (legacy data)
+    return inventory.filter(i => i.branch_id === currentBranch.id || !i.branch_id);
+  }, [inventory, currentBranch]);
+  
+  const lowStockItems = useMemo(() => 
+    branchInventory.filter(i => i.quantity <= i.min_quantity)
+  , [branchInventory]);
+  
+  const filteredInventory = useMemo(() => 
+    branchInventory.filter(i => 
+      i.name.toLowerCase().includes(search.toLowerCase()) || 
+      (i.sku && i.sku.toLowerCase().includes(search.toLowerCase()))
+    )
+  , [branchInventory, search]);
 
-  const lowStockItems = inventory.filter(i => i.quantity <= i.min_quantity);
-  const filteredInventory = inventory.filter(i => 
-    i.name.toLowerCase().includes(search.toLowerCase()) || 
-    (i.sku && i.sku.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Filter stock movements by current branch items
+  const branchStockMovements = useMemo(() => {
+    const branchItemIds = branchInventory.map(i => i.id);
+    return stockMovements.filter(m => branchItemIds.includes(m.item_id));
+  }, [branchInventory, stockMovements]);
 
   const stats = useMemo(() => ({
-    totalItems: inventory.length,
+    totalItems: branchInventory.length,
     lowStock: lowStockItems.length,
-    movementsToday: stockMovements.filter(m => m.date === new Date().toISOString().split('T')[0]).length,
-    totalValue: inventory.reduce((s, i) => s + (i.quantity * i.cost_price), 0),
-  }), [inventory, stockMovements, lowStockItems]);
+    movementsToday: branchStockMovements.filter(m => m.date === new Date().toISOString().split('T')[0]).length,
+    totalValue: branchInventory.reduce((s, i) => s + (i.quantity * i.cost_price), 0),
+  }), [branchInventory, branchStockMovements, lowStockItems]);
+
+  // Auth redirect effect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const openAdjustModal = (item: any, type: 'in' | 'out') => {
     setSelectedItem(item);
@@ -79,6 +103,13 @@ export default function StockPage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader
           title={locale === 'lo' ? 'ຈັດການສະຕັອກ' : 'Stock Management'}
           subtitle={locale === 'lo' ? 'ເພີ່ມ ແລະ ຕັດສະຕັອກສິນຄ້າ' : 'Add and deduct inventory stock'}

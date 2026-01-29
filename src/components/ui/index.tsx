@@ -140,18 +140,28 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
-        className={cn('bg-white rounded-2xl shadow-2xl w-full animate-fadeIn', sizes[size])}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto" 
+      onClick={onClose}
+    >
+      <div className="min-h-full flex items-center justify-center p-4">
+        <div 
+          className={cn(
+            'bg-white rounded-2xl shadow-2xl w-full animate-fadeIn',
+            sizes[size]
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b">
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          {/* Content */}
+          <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
         </div>
-        <div className="p-6">{children}</div>
       </div>
     </div>
   );
@@ -280,9 +290,10 @@ interface AlertProps {
   variant?: 'info' | 'success' | 'warning' | 'error';
   title?: string;
   children: React.ReactNode;
+  className?: string;
 }
 
-export function Alert({ variant = 'info', title, children }: AlertProps) {
+export function Alert({ variant = 'info', title, children, className }: AlertProps) {
   const variants = {
     info: { bg: 'bg-blue-50 border-blue-200', icon: Info, iconColor: 'text-blue-500' },
     success: { bg: 'bg-emerald-50 border-emerald-200', icon: CheckCircle, iconColor: 'text-emerald-500' },
@@ -293,7 +304,7 @@ export function Alert({ variant = 'info', title, children }: AlertProps) {
   const { bg, icon: Icon, iconColor } = variants[variant];
 
   return (
-    <div className={cn('flex gap-3 p-4 rounded-xl border', bg)}>
+    <div className={cn('flex gap-3 p-4 rounded-xl border', bg, className)}>
       <Icon className={cn('w-5 h-5 flex-shrink-0 mt-0.5', iconColor)} />
       <div>
         {title && <h4 className="font-medium text-gray-900 mb-1">{title}</h4>}

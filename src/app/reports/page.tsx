@@ -2,27 +2,40 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore, useDataStore } from '@/lib/store';
+import { useAuthStore, useDataStore, mockBranches } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Badge, PageHeader, StatCard } from '@/components/ui';
-import { TrendingUp, TrendingDown, DollarSign, Calendar, PieChart, BarChart2, Users, Scissors, Package, FileText, ArrowRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Calendar, PieChart, BarChart2, Users, Scissors, Package, FileText, ArrowRight, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ReportsPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
   const { transactions, appointments, customers, services, inventory, bills, getFinancialSummary } = useDataStore();
   const { locale, formatCurrency } = useI18n();
   
   const [period, setPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [selectedBranchId, setSelectedBranchId] = useState<number | 'all'>('all'); // 'all' = ทุกสาขา
 
-  useEffect(() => { 
-    if (!isAuthenticated) router.push('/login'); 
-    if (user?.role === 'staff') router.push('/dashboard');
-  }, [isAuthenticated, user, router]);
-  
-  if (!isAuthenticated || user?.role === 'staff') return null;
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin';
+
+  // Filter by selected branch (or all branches)
+  const filteredTransactions = useMemo(() => {
+    if (selectedBranchId === 'all') return transactions;
+    return transactions.filter((t: any) => t.branch_id === selectedBranchId || !t.branch_id);
+  }, [transactions, selectedBranchId]);
+
+  const filteredAppointments = useMemo(() => {
+    if (selectedBranchId === 'all') return appointments;
+    return appointments.filter((a: any) => a.branch_id === selectedBranchId || !a.branch_id);
+  }, [appointments, selectedBranchId]);
+
+  const filteredBills = useMemo(() => {
+    if (selectedBranchId === 'all') return bills;
+    return bills.filter((b: any) => b.branch_id === selectedBranchId || !b.branch_id);
+  }, [bills, selectedBranchId]);
 
   const dateRange = useMemo(() => {
     const end = new Date();
@@ -36,24 +49,33 @@ export default function ReportsPage() {
     return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] };
   }, [period]);
 
-  const summary = useMemo(() => getFinancialSummary(dateRange.start, dateRange.end), [dateRange, transactions, getFinancialSummary]);
+  const summary = useMemo(() => {
+    const filtered = filteredTransactions.filter((t: any) => t.date >= dateRange.start && t.date <= dateRange.end);
+    const income = filtered.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + t.amount, 0);
+    const expenses = filtered.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + t.amount, 0);
+    const expenseByCategory = filtered.filter((t: any) => t.type === 'expense').reduce((acc: Record<string, number>, t: any) => {
+      acc[t.category_name] = (acc[t.category_name] || 0) + t.amount;
+      return acc;
+    }, {});
+    return { totalIncome: income, totalExpenses: expenses, netProfit: income - expenses, expenseByCategory, transactionCount: filtered.length };
+  }, [filteredTransactions, dateRange]);
 
   const stats = useMemo(() => {
-    const periodAppts = appointments.filter(a => a.appointment_date >= dateRange.start && a.appointment_date <= dateRange.end);
-    const periodBills = bills.filter((b: any) => b.created_at >= dateRange.start && b.created_at <= dateRange.end);
+    const periodAppts = filteredAppointments.filter((a: any) => a.appointment_date >= dateRange.start && a.appointment_date <= dateRange.end);
+    const periodBills = filteredBills.filter((b: any) => b.created_at >= dateRange.start && b.created_at <= dateRange.end);
     
     return {
       totalAppointments: periodAppts.length,
-      completedAppointments: periodAppts.filter(a => a.status === 'done').length,
-      cancelledAppointments: periodAppts.filter(a => a.status === 'cancelled').length,
+      completedAppointments: periodAppts.filter((a: any) => a.status === 'done').length,
+      cancelledAppointments: periodAppts.filter((a: any) => a.status === 'cancelled').length,
       totalBills: periodBills.length,
       averageTicket: periodBills.length > 0 ? Math.round(periodBills.reduce((s: number, b: any) => s + b.grand_total, 0) / periodBills.length) : 0,
     };
-  }, [appointments, bills, dateRange]);
+  }, [filteredAppointments, filteredBills, dateRange]);
 
   // Top services by revenue
   const topServices = useMemo(() => {
-    const periodBills = bills.filter((b: any) => b.created_at >= dateRange.start && b.created_at <= dateRange.end);
+    const periodBills = filteredBills.filter((b: any) => b.created_at >= dateRange.start && b.created_at <= dateRange.end);
     const serviceRevenue: Record<string, { name: string, revenue: number, count: number }> = {};
     
     periodBills.forEach((b: any) => {
@@ -64,7 +86,7 @@ export default function ReportsPage() {
     });
     
     return Object.values(serviceRevenue).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-  }, [bills, dateRange]);
+  }, [filteredBills, dateRange]);
 
   // Expense breakdown
   const expenseBreakdown = useMemo(() => {
@@ -75,9 +97,77 @@ export default function ReportsPage() {
     }));
   }, [summary]);
 
+  // Branch comparison stats (for admin)
+  const branchComparison = useMemo(() => {
+    if (!isAdmin) return [];
+    return mockBranches.map(branch => {
+      const branchTrans = transactions.filter((t: any) => t.branch_id === branch.id && t.date >= dateRange.start && t.date <= dateRange.end);
+      const branchBillsList = bills.filter((b: any) => b.branch_id === branch.id && b.created_at >= dateRange.start && b.created_at <= dateRange.end);
+      const income = branchTrans.filter((t: any) => t.type === 'income').reduce((s: number, t: any) => s + t.amount, 0);
+      const expenses = branchTrans.filter((t: any) => t.type === 'expense').reduce((s: number, t: any) => s + t.amount, 0);
+      return {
+        id: branch.id,
+        name: locale === 'lo' ? branch.name : branch.name_en,
+        income,
+        expenses,
+        profit: income - expenses,
+        bills: branchBillsList.length,
+      };
+    });
+  }, [isAdmin, transactions, bills, dateRange, locale]);
+
+  // Auth redirect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+    else if (user?.role === 'staff') router.push('/dashboard');
+  }, [isAuthenticated, currentBranch, user, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch || user?.role === 'staff') return null;
+
+  // Get selected branch name
+  const getSelectedBranchName = () => {
+    if (selectedBranchId === 'all') return locale === 'lo' ? 'ທຸກສາຂາ' : 'All Branches';
+    const branch = mockBranches.find(b => b.id === selectedBranchId);
+    return branch ? (locale === 'lo' ? branch.name : branch.name_en) : '';
+  };
+
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch Selector for Admin */}
+        {isAdmin && (
+          <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-100">
+            <Building2 className="w-5 h-5 text-rose-500" />
+            <span className="font-medium text-gray-700">{locale === 'lo' ? 'ເລືອກສາຂາ:' : 'Select Branch:'}</span>
+            <select 
+              value={selectedBranchId} 
+              onChange={(e) => setSelectedBranchId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+              className="px-4 py-2 border border-rose-200 rounded-lg bg-white font-medium text-rose-600 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+            >
+              <option value="all">{locale === 'lo' ? '📊 ທຸກສາຂາ (ລວມ)' : '📊 All Branches (Combined)'}</option>
+              {mockBranches.filter(b => b.is_active).map(branch => (
+                <option key={branch.id} value={branch.id}>
+                  {locale === 'lo' ? branch.name : branch.name_en}
+                </option>
+              ))}
+            </select>
+            <span className="ml-auto text-sm text-gray-500">
+              {locale === 'lo' ? 'ກຳລັງເບິ່ງ:' : 'Viewing:'} <strong className="text-rose-600">{getSelectedBranchName()}</strong>
+            </span>
+          </div>
+        )}
+
+        {/* Non-admin branch indicator */}
+        {!isAdmin && (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Building2 className="w-4 h-4" />
+            <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+            <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+          </div>
+        )}
+
         <PageHeader
           title={locale === 'lo' ? 'ລາຍງານ' : 'Reports'}
           subtitle={locale === 'lo' ? 'ສະຫຼຸບຂໍ້ມູນທຸລະກິດ' : 'Business summary and analytics'}
@@ -91,7 +181,7 @@ export default function ReportsPage() {
         />
 
         {/* Period Selector */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {[
             { key: 'today', label: locale === 'lo' ? 'ມື້ນີ້' : 'Today' },
             { key: 'week', label: locale === 'lo' ? '7 ວັນ' : '7 Days' },
@@ -104,6 +194,50 @@ export default function ReportsPage() {
             </button>
           ))}
         </div>
+
+        {/* Branch Comparison Table (Admin only, when viewing all branches) */}
+        {isAdmin && selectedBranchId === 'all' && (
+          <Card className="p-6">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-rose-500" />
+              {locale === 'lo' ? 'ປຽບທຽບສາຂາ' : 'Branch Comparison'}
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4 font-medium text-gray-600">{locale === 'lo' ? 'ສາຂາ' : 'Branch'}</th>
+                    <th className="text-right py-3 px-4 font-medium text-gray-600">{locale === 'lo' ? 'ລາຍຮັບ' : 'Income'}</th>
+                    <th className="text-right py-3 px-4 font-medium text-gray-600">{locale === 'lo' ? 'ລາຍຈ່າຍ' : 'Expenses'}</th>
+                    <th className="text-right py-3 px-4 font-medium text-gray-600">{locale === 'lo' ? 'ກຳໄລ' : 'Profit'}</th>
+                    <th className="text-right py-3 px-4 font-medium text-gray-600">{locale === 'lo' ? 'ບິນ' : 'Bills'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {branchComparison.map((branch, i) => (
+                    <tr key={branch.id} className={i % 2 === 0 ? 'bg-gray-50' : ''}>
+                      <td className="py-3 px-4 font-medium">{branch.name}</td>
+                      <td className="py-3 px-4 text-right text-emerald-600">+{formatCurrency(branch.income)}</td>
+                      <td className="py-3 px-4 text-right text-red-600">-{formatCurrency(branch.expenses)}</td>
+                      <td className={`py-3 px-4 text-right font-bold ${branch.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {branch.profit >= 0 ? '+' : ''}{formatCurrency(branch.profit)}
+                      </td>
+                      <td className="py-3 px-4 text-right">{branch.bills}</td>
+                    </tr>
+                  ))}
+                  {/* Total row */}
+                  <tr className="border-t-2 border-gray-300 bg-rose-50 font-bold">
+                    <td className="py-3 px-4">{locale === 'lo' ? 'ລວມທັງໝົດ' : 'Total'}</td>
+                    <td className="py-3 px-4 text-right text-emerald-600">+{formatCurrency(branchComparison.reduce((s, b) => s + b.income, 0))}</td>
+                    <td className="py-3 px-4 text-right text-red-600">-{formatCurrency(branchComparison.reduce((s, b) => s + b.expenses, 0))}</td>
+                    <td className="py-3 px-4 text-right text-emerald-700">{formatCurrency(branchComparison.reduce((s, b) => s + b.profit, 0))}</td>
+                    <td className="py-3 px-4 text-right">{branchComparison.reduce((s, b) => s + b.bills, 0)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
 
         {/* Financial Summary */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

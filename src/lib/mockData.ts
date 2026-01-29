@@ -12,16 +12,26 @@ export const mockUsers = [
 ];
 
 export const mockCustomers = [
-  { id: 1, name: 'ນາງ ສຸພາພອນ ແກ້ວວົງສາ', phone: '020 5551 1001', email: 'suphaphone@email.com', gender: 'female', date_of_birth: '1990-05-15', address: 'ບ້ານ ໂນນສະຫວ່າງ', total_visits: 25, total_spent: 5500000, notes: 'VIP Customer - Allergic to certain products', is_active: true, created_at: '2024-01-15' },
-  { id: 2, name: 'ນາງ ວັນນາ ສີສຸວັນ', phone: '020 5551 1002', email: 'vanna@email.com', gender: 'female', date_of_birth: '1988-08-20', address: 'ບ້ານ ດົງໂດກ', total_visits: 18, total_spent: 3200000, notes: 'Prefers morning appointments', is_active: true, created_at: '2024-02-01' },
-  { id: 3, name: 'ນາງ ມະນີຈັນ ພົມມະວົງ', phone: '020 5551 1003', email: 'manichan@email.com', gender: 'female', date_of_birth: '1995-12-10', address: 'ບ້ານ ໜອງບົວ', total_visits: 5, total_spent: 750000, notes: 'New customer', is_active: true, created_at: '2024-12-01' },
-  { id: 4, name: 'ທ້າວ ສົມພອນ ແກ້ວມະນີ', phone: '020 5551 1004', email: 'somphone@email.com', gender: 'male', date_of_birth: '1985-03-25', address: 'ບ້ານ ທາດຫຼວງ', total_visits: 30, total_spent: 1500000, notes: 'Regular monthly haircut', is_active: true, created_at: '2024-01-01' },
-  { id: 5, name: 'ນາງ ຈັນທະລາ ສີພັນດອນ', phone: '020 5551 1005', email: 'chanthala@email.com', gender: 'female', date_of_birth: '1992-07-08', address: 'ບ້ານ ໂພນໄຊ', total_visits: 12, total_spent: 2800000, notes: 'Prefers weekend appointments', is_active: true, created_at: '2024-03-15' },
-  { id: 6, name: 'ນາງ ບຸນມີ ວົງປະເສີດ', phone: '020 5551 1006', email: 'bounmi@email.com', gender: 'female', date_of_birth: '2000-11-30', address: 'ບ້ານ ດົງປ່າແຫຼບ', total_visits: 8, total_spent: 600000, notes: 'Student - 10% discount', is_active: true, created_at: '2024-04-01' },
-  { id: 7, name: 'ທ້າວ ພູວົງ ຈັນທະວົງ', phone: '020 5551 1007', email: 'phouvong@email.com', gender: 'male', date_of_birth: '1978-01-15', address: 'ບ້ານ ສີສະເກດ', total_visits: 15, total_spent: 4500000, notes: 'CEO - Premium services only', is_active: true, created_at: '2024-01-20' },
-  { id: 8, name: 'ນາງ ນິດຕະຍາ ແສງຈັນ', phone: '020 5551 1008', email: 'nittaya@email.com', gender: 'female', date_of_birth: '1993-09-12', address: 'ບ້ານ ໂພນທັນ', total_visits: 20, total_spent: 2000000, notes: 'Loves nail art designs', is_active: true, created_at: '2024-02-10' },
-  { id: 9, name: 'ນາງ ອຳພອນ ສຸລິຍະວົງ', phone: '020 5551 1009', email: 'amphon@email.com', gender: 'female', date_of_birth: '1987-04-20', address: 'ບ້ານ ຫາດຊາຍຟອງ', total_visits: 10, total_spent: 1800000, notes: 'Sensitive skin - use hypoallergenic products', is_active: true, created_at: '2024-03-01' },
-  { id: 10, name: 'ທ້າວ ວິລະກອນ ພົມມະສອນ', phone: '020 5551 1010', email: 'vilakon@email.com', gender: 'male', date_of_birth: '1990-06-05', address: 'ບ້ານ ໂນນແກ້ວ', total_visits: 12, total_spent: 720000, notes: 'Monthly visits - beard trim', is_active: true, created_at: '2024-02-20' },
+  // Branch 1 - Main Branch (Dongdok) - 5 customers
+  { id: 1, name: 'ນາງ ສຸພາພອນ ແກ້ວວົງສາ', phone: '020 5551 1001', email: 'suphaphone@email.com', gender: 'female', date_of_birth: '1990-05-15', address: 'ບ້ານ ໂນນສະຫວ່າງ', total_visits: 25, total_spent: 5500000, notes: 'VIP Customer', is_active: true, created_at: '2024-01-15', branch_id: 1 },
+  { id: 2, name: 'ນາງ ວັນນາ ສີສຸວັນ', phone: '020 5551 1002', email: 'vanna@email.com', gender: 'female', date_of_birth: '1988-08-20', address: 'ບ້ານ ດົງໂດກ', total_visits: 18, total_spent: 3200000, notes: 'Prefers morning', is_active: true, created_at: '2024-02-01', branch_id: 1 },
+  { id: 3, name: 'ນາງ ມະນີຈັນ ພົມມະວົງ', phone: '020 5551 1003', email: 'manichan@email.com', gender: 'female', date_of_birth: '1995-12-10', address: 'ບ້ານ ໜອງບົວ', total_visits: 5, total_spent: 750000, notes: 'New customer', is_active: true, created_at: '2024-12-01', branch_id: 1 },
+  { id: 4, name: 'ທ້າວ ສົມພອນ ແກ້ວມະນີ', phone: '020 5551 1004', email: 'somphone@email.com', gender: 'male', date_of_birth: '1985-03-25', address: 'ບ້ານ ທາດຫຼວງ', total_visits: 30, total_spent: 1500000, notes: 'Regular haircut', is_active: true, created_at: '2024-01-01', branch_id: 1 },
+  { id: 5, name: 'ນາງ ສົມສຸກ ໄຊຍະວົງ', phone: '020 5551 1011', email: 'somsuk@email.com', gender: 'female', date_of_birth: '1992-03-18', address: 'ບ້ານ ດົງໂດກ', total_visits: 15, total_spent: 2100000, notes: '', is_active: true, created_at: '2024-02-15', branch_id: 1 },
+  
+  // Branch 2 - That Luang - 5 customers
+  { id: 6, name: 'ນາງ ຈັນທະລາ ສີພັນດອນ', phone: '020 5551 1005', email: 'chanthala@email.com', gender: 'female', date_of_birth: '1992-07-08', address: 'ບ້ານ ໂພນໄຊ', total_visits: 12, total_spent: 2800000, notes: 'Weekend customer', is_active: true, created_at: '2024-03-15', branch_id: 2 },
+  { id: 7, name: 'ນາງ ບຸນມີ ວົງປະເສີດ', phone: '020 5551 1006', email: 'bounmi@email.com', gender: 'female', date_of_birth: '2000-11-30', address: 'ບ້ານ ດົງປ່າແຫຼບ', total_visits: 8, total_spent: 600000, notes: 'Student', is_active: true, created_at: '2024-04-01', branch_id: 2 },
+  { id: 8, name: 'ທ້າວ ພູວົງ ຈັນທະວົງ', phone: '020 5551 1007', email: 'phouvong@email.com', gender: 'male', date_of_birth: '1978-01-15', address: 'ບ້ານ ສີສະເກດ', total_visits: 15, total_spent: 4500000, notes: 'VIP', is_active: true, created_at: '2024-01-20', branch_id: 2 },
+  { id: 9, name: 'ນາງ ແກ້ວມະນີ ສຸວັນນະພູມ', phone: '020 5551 1012', email: 'keomani@email.com', gender: 'female', date_of_birth: '1989-06-22', address: 'ບ້ານ ທາດຫຼວງ', total_visits: 10, total_spent: 1800000, notes: '', is_active: true, created_at: '2024-03-01', branch_id: 2 },
+  { id: 10, name: 'ນາງ ດາວອນ ພອນສະຫວັນ', phone: '020 5551 1013', email: 'daovone@email.com', gender: 'female', date_of_birth: '1995-09-10', address: 'ບ້ານ ໂພນສະຫວັນ', total_visits: 6, total_spent: 950000, notes: '', is_active: true, created_at: '2024-05-01', branch_id: 2 },
+  
+  // Branch 3 - Phonetong - 5 customers
+  { id: 11, name: 'ນາງ ນິດຕະຍາ ແສງຈັນ', phone: '020 5551 1008', email: 'nittaya@email.com', gender: 'female', date_of_birth: '1993-09-12', address: 'ບ້ານ ໂພນທັນ', total_visits: 20, total_spent: 2000000, notes: 'Nail art lover', is_active: true, created_at: '2024-02-10', branch_id: 3 },
+  { id: 12, name: 'ນາງ ອຳພອນ ສຸລິຍະວົງ', phone: '020 5551 1009', email: 'amphon@email.com', gender: 'female', date_of_birth: '1987-04-20', address: 'ບ້ານ ຫາດຊາຍຟອງ', total_visits: 10, total_spent: 1800000, notes: 'Sensitive skin', is_active: true, created_at: '2024-03-01', branch_id: 3 },
+  { id: 13, name: 'ທ້າວ ວິລະກອນ ພົມມະສອນ', phone: '020 5551 1010', email: 'vilakon@email.com', gender: 'male', date_of_birth: '1990-06-05', address: 'ບ້ານ ໂນນແກ້ວ', total_visits: 12, total_spent: 720000, notes: 'Beard trim', is_active: true, created_at: '2024-02-20', branch_id: 3 },
+  { id: 14, name: 'ນາງ ພອນສະຫວັນ ວົງໄຊ', phone: '020 5551 1014', email: 'phonsavan@email.com', gender: 'female', date_of_birth: '1991-12-03', address: 'ບ້ານ ໂພນຕ້ອງ', total_visits: 8, total_spent: 1200000, notes: '', is_active: true, created_at: '2024-04-15', branch_id: 3 },
+  { id: 15, name: 'ນາງ ຄຳພູ ແສງສະຫວ່າງ', phone: '020 5551 1015', email: 'khamphou@email.com', gender: 'female', date_of_birth: '1988-07-28', address: 'ບ້ານ ໂພນຕ້ອງ', total_visits: 14, total_spent: 2500000, notes: 'VIP', is_active: true, created_at: '2024-01-10', branch_id: 3 },
 ];
 
 export const mockServiceCategories = [
@@ -69,24 +79,38 @@ export const mockInventoryCategories = [
 ];
 
 export const mockInventory = [
-  { id: 1, name: 'Shampoo Professional 500ml', name_lo: 'ແຊມພູມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'HAIR-001', quantity: 25, min_quantity: 10, unit: 'bottle', cost_price: 80000, sell_price: 120000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true },
-  { id: 2, name: 'Conditioner Professional 500ml', name_lo: 'ຄອນດິຊັນເນີມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'HAIR-002', quantity: 20, min_quantity: 10, unit: 'bottle', cost_price: 85000, sell_price: 130000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true },
-  { id: 3, name: 'Hair Color - Black', name_lo: 'ສີຍ້ອມຜົມ - ດຳ', category: 'Hair Products', category_id: 1, sku: 'HAIR-003', quantity: 15, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true },
-  { id: 4, name: 'Hair Color - Brown', name_lo: 'ສີຍ້ອມຜົມ - ນ້ຳຕານ', category: 'Hair Products', category_id: 1, sku: 'HAIR-004', quantity: 3, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true },
-  { id: 5, name: 'Hair Spray 300ml', name_lo: 'ສະເປຣຜົມ 300ml', category: 'Hair Products', category_id: 1, sku: 'HAIR-005', quantity: 18, min_quantity: 8, unit: 'bottle', cost_price: 45000, sell_price: 75000, supplier: 'Beauty Supply Co.', location: 'Shelf A3', image_url: null as string | null, is_active: true },
-  { id: 6, name: 'Hair Treatment Mask', name_lo: 'ມາສ໌ທຣີດເມັນຜົມ', category: 'Hair Products', category_id: 1, sku: 'HAIR-006', quantity: 4, min_quantity: 5, unit: 'jar', cost_price: 120000, sell_price: 200000, supplier: 'Premium Hair Co.', location: 'Shelf A3', image_url: null as string | null, is_active: true },
-  { id: 7, name: 'Facial Cleanser 200ml', name_lo: 'ນ້ຳຢາລ້າງໜ້າ 200ml', category: 'Skincare', category_id: 2, sku: 'SKIN-001', quantity: 30, min_quantity: 15, unit: 'bottle', cost_price: 60000, sell_price: 95000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true },
-  { id: 8, name: 'Moisturizer 50ml', name_lo: 'ຄຣີມບຳລຸງຜິວ 50ml', category: 'Skincare', category_id: 2, sku: 'SKIN-002', quantity: 22, min_quantity: 10, unit: 'jar', cost_price: 90000, sell_price: 150000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true },
-  { id: 9, name: 'Facial Serum 30ml', name_lo: 'ເຊລັ່ມບຳລຸງ 30ml', category: 'Skincare', category_id: 2, sku: 'SKIN-003', quantity: 15, min_quantity: 8, unit: 'bottle', cost_price: 150000, sell_price: 280000, supplier: 'Premium Skin Co.', location: 'Shelf B2', image_url: null as string | null, is_active: true },
-  { id: 10, name: 'Face Mask Sheet (10pcs)', name_lo: 'ແຜ່ນມາສ໌ໜ້າ (10ແຜ່ນ)', category: 'Skincare', category_id: 2, sku: 'SKIN-004', quantity: 40, min_quantity: 20, unit: 'pack', cost_price: 80000, sell_price: 120000, supplier: 'K-Beauty Import', location: 'Shelf B2', image_url: null as string | null, is_active: true },
-  { id: 11, name: 'Nail Polish Set (12 colors)', name_lo: 'ຊຸດທາເລັບ (12ສີ)', category: 'Nail Products', category_id: 3, sku: 'NAIL-001', quantity: 10, min_quantity: 5, unit: 'set', cost_price: 200000, sell_price: 350000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true },
-  { id: 12, name: 'Gel Base Coat', name_lo: 'ເຈວຮອງພື້ນ', category: 'Nail Products', category_id: 3, sku: 'NAIL-002', quantity: 20, min_quantity: 10, unit: 'bottle', cost_price: 45000, sell_price: 80000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true },
-  { id: 13, name: 'Lavender Massage Oil 500ml', name_lo: 'ນ້ຳມັນນວດລາເວນເດີ 500ml', category: 'Massage Oils', category_id: 4, sku: 'OIL-001', quantity: 15, min_quantity: 8, unit: 'bottle', cost_price: 120000, sell_price: 200000, supplier: 'Aroma Thailand', location: 'Shelf D1', image_url: null as string | null, is_active: true },
-  { id: 14, name: 'Coconut Massage Oil 500ml', name_lo: 'ນ້ຳມັນນວດໝາກພ້າວ 500ml', category: 'Massage Oils', category_id: 4, sku: 'OIL-002', quantity: 2, min_quantity: 10, unit: 'bottle', cost_price: 100000, sell_price: 180000, supplier: 'Aroma Thailand', location: 'Shelf D1', image_url: null as string | null, is_active: true },
-  { id: 15, name: 'Foundation Set', name_lo: 'ຊຸດຮອງພື້ນ', category: 'Makeup', category_id: 5, sku: 'MAKE-001', quantity: 10, min_quantity: 5, unit: 'set', cost_price: 300000, sell_price: 500000, supplier: 'K-Beauty Import', location: 'Shelf E1', image_url: null as string | null, is_active: true },
-  { id: 16, name: 'Professional Hair Dryer', name_lo: 'ໄດເປົ່າຜົມມືອາຊີບ', category: 'Equipment', category_id: 6, sku: 'EQUIP-001', quantity: 5, min_quantity: 2, unit: 'piece', cost_price: 350000, sell_price: 500000, supplier: 'Salon Equipment Ltd.', location: 'Storage', image_url: null as string | null, is_active: true },
-  { id: 17, name: 'Disposable Towels (100pcs)', name_lo: 'ຜ້າເຊັດໃຊ້ຄັ້ງດຽວ (100ຜືນ)', category: 'Consumables', category_id: 7, sku: 'CONS-001', quantity: 50, min_quantity: 20, unit: 'pack', cost_price: 80000, sell_price: 120000, supplier: 'Supply Mart', location: 'Storage', image_url: null as string | null, is_active: true },
-  { id: 18, name: 'Cotton Pads (500pcs)', name_lo: 'ສຳລີ (500ແຜ່ນ)', category: 'Consumables', category_id: 7, sku: 'CONS-002', quantity: 30, min_quantity: 15, unit: 'pack', cost_price: 50000, sell_price: 80000, supplier: 'Supply Mart', location: 'Storage', image_url: null as string | null, is_active: true },
+  // Branch 1 - Main Branch (Dongdok)
+  { id: 1, name: 'Shampoo Professional 500ml', name_lo: 'ແຊມພູມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-001', quantity: 25, min_quantity: 10, unit: 'bottle', cost_price: 80000, sell_price: 120000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 2, name: 'Conditioner Professional 500ml', name_lo: 'ຄອນດິຊັນເນີມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-002', quantity: 20, min_quantity: 10, unit: 'bottle', cost_price: 85000, sell_price: 130000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 3, name: 'Hair Color - Black', name_lo: 'ສີຍ້ອມຜົມ - ດຳ', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-003', quantity: 15, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 4, name: 'Hair Color - Brown', name_lo: 'ສີຍ້ອມຜົມ - ນ້ຳຕານ', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-004', quantity: 3, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 5, name: 'Hair Spray 300ml', name_lo: 'ສະເປຣຜົມ 300ml', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-005', quantity: 18, min_quantity: 8, unit: 'bottle', cost_price: 45000, sell_price: 75000, supplier: 'Beauty Supply Co.', location: 'Shelf A3', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 6, name: 'Hair Treatment Mask', name_lo: 'ມາສ໌ທຣີດເມັນຜົມ', category: 'Hair Products', category_id: 1, sku: 'MAIN-HAIR-006', quantity: 4, min_quantity: 5, unit: 'jar', cost_price: 120000, sell_price: 200000, supplier: 'Premium Hair Co.', location: 'Shelf A3', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 7, name: 'Facial Cleanser 200ml', name_lo: 'ນ້ຳຢາລ້າງໜ້າ 200ml', category: 'Skincare', category_id: 2, sku: 'MAIN-SKIN-001', quantity: 30, min_quantity: 15, unit: 'bottle', cost_price: 60000, sell_price: 95000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 8, name: 'Moisturizer 50ml', name_lo: 'ຄຣີມບຳລຸງຜິວ 50ml', category: 'Skincare', category_id: 2, sku: 'MAIN-SKIN-002', quantity: 22, min_quantity: 10, unit: 'jar', cost_price: 90000, sell_price: 150000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 9, name: 'Facial Serum 30ml', name_lo: 'ເຊລັ່ມບຳລຸງ 30ml', category: 'Skincare', category_id: 2, sku: 'MAIN-SKIN-003', quantity: 15, min_quantity: 8, unit: 'bottle', cost_price: 150000, sell_price: 280000, supplier: 'Premium Skin Co.', location: 'Shelf B2', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 10, name: 'Face Mask Sheet (10pcs)', name_lo: 'ແຜ່ນມາສ໌ໜ້າ (10ແຜ່ນ)', category: 'Skincare', category_id: 2, sku: 'MAIN-SKIN-004', quantity: 40, min_quantity: 20, unit: 'pack', cost_price: 80000, sell_price: 120000, supplier: 'K-Beauty Import', location: 'Shelf B2', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 11, name: 'Nail Polish Set (12 colors)', name_lo: 'ຊຸດທາເລັບ (12ສີ)', category: 'Nail Products', category_id: 3, sku: 'MAIN-NAIL-001', quantity: 10, min_quantity: 5, unit: 'set', cost_price: 200000, sell_price: 350000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  { id: 12, name: 'Gel Base Coat', name_lo: 'ເຈວຮອງພື້ນ', category: 'Nail Products', category_id: 3, sku: 'MAIN-NAIL-002', quantity: 20, min_quantity: 10, unit: 'bottle', cost_price: 45000, sell_price: 80000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true, branch_id: 1 },
+  
+  // Branch 2 - That Luang
+  { id: 13, name: 'Shampoo Professional 500ml', name_lo: 'ແຊມພູມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'TL-HAIR-001', quantity: 18, min_quantity: 10, unit: 'bottle', cost_price: 80000, sell_price: 120000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 14, name: 'Conditioner Professional 500ml', name_lo: 'ຄອນດິຊັນເນີມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'TL-HAIR-002', quantity: 12, min_quantity: 10, unit: 'bottle', cost_price: 85000, sell_price: 130000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 15, name: 'Hair Color - Black', name_lo: 'ສີຍ້ອມຜົມ - ດຳ', category: 'Hair Products', category_id: 1, sku: 'TL-HAIR-003', quantity: 8, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 16, name: 'Lavender Massage Oil 500ml', name_lo: 'ນ້ຳມັນນວດລາເວນເດີ 500ml', category: 'Massage Oils', category_id: 4, sku: 'TL-OIL-001', quantity: 10, min_quantity: 8, unit: 'bottle', cost_price: 120000, sell_price: 200000, supplier: 'Aroma Thailand', location: 'Shelf D1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 17, name: 'Coconut Massage Oil 500ml', name_lo: 'ນ້ຳມັນນວດໝາກພ້າວ 500ml', category: 'Massage Oils', category_id: 4, sku: 'TL-OIL-002', quantity: 5, min_quantity: 10, unit: 'bottle', cost_price: 100000, sell_price: 180000, supplier: 'Aroma Thailand', location: 'Shelf D1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 18, name: 'Facial Cleanser 200ml', name_lo: 'ນ້ຳຢາລ້າງໜ້າ 200ml', category: 'Skincare', category_id: 2, sku: 'TL-SKIN-001', quantity: 20, min_quantity: 15, unit: 'bottle', cost_price: 60000, sell_price: 95000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 19, name: 'Moisturizer 50ml', name_lo: 'ຄຣີມບຳລຸງຜິວ 50ml', category: 'Skincare', category_id: 2, sku: 'TL-SKIN-002', quantity: 15, min_quantity: 10, unit: 'jar', cost_price: 90000, sell_price: 150000, supplier: 'Skin Care Plus', location: 'Shelf B1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  { id: 20, name: 'Foundation Set', name_lo: 'ຊຸດຮອງພື້ນ', category: 'Makeup', category_id: 5, sku: 'TL-MAKE-001', quantity: 6, min_quantity: 5, unit: 'set', cost_price: 300000, sell_price: 500000, supplier: 'K-Beauty Import', location: 'Shelf E1', image_url: null as string | null, is_active: true, branch_id: 2 },
+  
+  // Branch 3 - Phonetong
+  { id: 21, name: 'Shampoo Professional 500ml', name_lo: 'ແຊມພູມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'PT-HAIR-001', quantity: 12, min_quantity: 10, unit: 'bottle', cost_price: 80000, sell_price: 120000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 22, name: 'Conditioner Professional 500ml', name_lo: 'ຄອນດິຊັນເນີມືອາຊີບ 500ml', category: 'Hair Products', category_id: 1, sku: 'PT-HAIR-002', quantity: 8, min_quantity: 10, unit: 'bottle', cost_price: 85000, sell_price: 130000, supplier: 'Beauty Supply Co.', location: 'Shelf A1', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 23, name: 'Hair Color - Black', name_lo: 'ສີຍ້ອມຜົມ - ດຳ', category: 'Hair Products', category_id: 1, sku: 'PT-HAIR-003', quantity: 5, min_quantity: 5, unit: 'box', cost_price: 150000, sell_price: 250000, supplier: 'Color Pro Ltd.', location: 'Shelf A2', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 24, name: 'Nail Polish Set (12 colors)', name_lo: 'ຊຸດທາເລັບ (12ສີ)', category: 'Nail Products', category_id: 3, sku: 'PT-NAIL-001', quantity: 4, min_quantity: 5, unit: 'set', cost_price: 200000, sell_price: 350000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 25, name: 'Gel Base Coat', name_lo: 'ເຈວຮອງພື້ນ', category: 'Nail Products', category_id: 3, sku: 'PT-NAIL-002', quantity: 12, min_quantity: 10, unit: 'bottle', cost_price: 45000, sell_price: 80000, supplier: 'Nail Art Co.', location: 'Shelf C1', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 26, name: 'Disposable Towels (100pcs)', name_lo: 'ຜ້າເຊັດໃຊ້ຄັ້ງດຽວ (100ຜືນ)', category: 'Consumables', category_id: 7, sku: 'PT-CONS-001', quantity: 30, min_quantity: 20, unit: 'pack', cost_price: 80000, sell_price: 120000, supplier: 'Supply Mart', location: 'Storage', image_url: null as string | null, is_active: true, branch_id: 3 },
+  { id: 27, name: 'Cotton Pads (500pcs)', name_lo: 'ສຳລີ (500ແຜ່ນ)', category: 'Consumables', category_id: 7, sku: 'PT-CONS-002', quantity: 18, min_quantity: 15, unit: 'pack', cost_price: 50000, sell_price: 80000, supplier: 'Supply Mart', location: 'Storage', image_url: null as string | null, is_active: true, branch_id: 3 },
 ];
 
 export const mockExpenseCategories = [
@@ -100,10 +124,11 @@ export const mockExpenseCategories = [
   { id: 8, name: 'Other', name_lo: 'ອື່ນໆ' },
 ];
 
-// Generate appointments
+// Generate appointments with branch_id
 const generateAppointments = () => {
   const appointments: any[] = [];
   const times = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'];
+  const branches = [1, 2, 3];
 
   let id = 1;
   for (let dayOffset = -7; dayOffset <= 7; dayOffset++) {
@@ -111,39 +136,46 @@ const generateAppointments = () => {
     date.setDate(date.getDate() + dayOffset);
     const dateStr = date.toISOString().split('T')[0];
 
-    const count = Math.floor(Math.random() * 4) + 2;
-    for (let i = 0; i < count; i++) {
-      const customer = mockCustomers[Math.floor(Math.random() * mockCustomers.length)];
-      const service = mockServices[Math.floor(Math.random() * mockServices.length)];
-      const staff = mockUsers.filter(u => u.role === 'staff')[Math.floor(Math.random() * 3)];
-      const time = times[Math.floor(Math.random() * times.length)];
-      const discount = Math.random() > 0.8 ? Math.floor(service.price * 0.1) : 0;
+    // Generate appointments for each branch
+    for (const branch_id of branches) {
+      const branchCustomers = mockCustomers.filter(c => c.branch_id === branch_id);
+      if (branchCustomers.length === 0) continue;
+      
+      const count = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < count; i++) {
+        const customer = branchCustomers[Math.floor(Math.random() * branchCustomers.length)];
+        const service = mockServices[Math.floor(Math.random() * mockServices.length)];
+        const staff = mockUsers.filter(u => u.role === 'staff')[Math.floor(Math.random() * 3)];
+        const time = times[Math.floor(Math.random() * times.length)];
+        const discount = Math.random() > 0.8 ? Math.floor(service.price * 0.1) : 0;
 
-      let status;
-      if (dayOffset < 0) status = Math.random() > 0.1 ? 'done' : 'cancelled';
-      else if (dayOffset === 0) status = ['pending', 'confirmed', 'in_progress', 'done'][Math.floor(Math.random() * 4)];
-      else status = Math.random() > 0.3 ? 'confirmed' : 'pending';
+        let status;
+        if (dayOffset < 0) status = Math.random() > 0.1 ? 'done' : 'cancelled';
+        else if (dayOffset === 0) status = ['pending', 'confirmed', 'in_progress', 'done'][Math.floor(Math.random() * 4)];
+        else status = Math.random() > 0.3 ? 'confirmed' : 'pending';
 
-      appointments.push({
-        id: id++,
-        customer_id: customer.id,
-        customer_name: customer.name,
-        customer_phone: customer.phone,
-        service_id: service.id,
-        service_name: service.name,
-        service_name_lo: service.name_lo,
-        staff_id: staff?.id || 3,
-        staff_name: staff?.full_name || 'Staff Demo',
-        appointment_date: dateStr,
-        appointment_time: time,
-        duration: service.duration,
-        price: service.price,
-        discount,
-        total_price: service.price - discount,
-        status,
-        notes: '',
-        created_at: dateStr,
-      });
+        appointments.push({
+          id: id++,
+          customer_id: customer.id,
+          customer_name: customer.name,
+          customer_phone: customer.phone,
+          service_id: service.id,
+          service_name: service.name,
+          service_name_lo: service.name_lo,
+          staff_id: staff?.id || 3,
+          staff_name: staff?.full_name || 'Staff Demo',
+          appointment_date: dateStr,
+          appointment_time: time,
+          duration: service.duration,
+          price: service.price,
+          discount,
+          total_price: service.price - discount,
+          status,
+          notes: '',
+          created_at: dateStr,
+          branch_id,
+        });
+      }
     }
   }
   return appointments;
@@ -151,12 +183,12 @@ const generateAppointments = () => {
 
 export const mockAppointments = generateAppointments();
 
-// Generate bills from completed appointments
+// Generate bills from completed appointments with branch_id
 const generateBills = () => {
   const bills: any[] = [];
   const completedAppts = mockAppointments.filter(a => a.status === 'done');
 
-  completedAppts.slice(0, 20).forEach((apt, i) => {
+  completedAppts.slice(0, 30).forEach((apt, i) => {
     const taxRate = 10;
     const subtotal = apt.price;
     const discount = apt.discount;
@@ -182,6 +214,7 @@ const generateBills = () => {
       payment_status: 'paid',
       notes: '',
       created_at: apt.appointment_date,
+      branch_id: apt.branch_id,
     });
   });
 
@@ -190,44 +223,45 @@ const generateBills = () => {
 
 export const mockBills = generateBills();
 
-// Generate transactions
+// Generate transactions with branch_id
 const generateTransactions = () => {
   const transactions: any[] = [];
   let id = 1;
+  const branches = [1, 2, 3];
 
-  // Expenses
-  const expenses = [
-    { category_id: 1, category: 'Rent', desc: 'ຄ່າເຊົ່າຮ້ານເດືອນ 1/2025', amount: 5000000 },
-    { category_id: 2, category: 'Utilities', desc: 'ຄ່າໄຟຟ້າ', amount: 800000 },
-    { category_id: 2, category: 'Utilities', desc: 'ຄ່ານ້ຳປະປາ', amount: 150000 },
-    { category_id: 3, category: 'Salary', desc: 'ເງິນເດືອນພະນັກງານ', amount: 8000000 },
-    { category_id: 4, category: 'Supplies', desc: 'ຊື້ຜ້າເຊັດ, ກະດາດ', amount: 350000 },
-    { category_id: 7, category: 'Stock Purchase', desc: 'ຊື້ແຊມພູ, ຄອນດິຊັນເນີ', amount: 2500000 },
-    { category_id: 7, category: 'Stock Purchase', desc: 'ຊື້ສີຍ້ອມຜົມ', amount: 1800000 },
-    { category_id: 6, category: 'Maintenance', desc: 'ສ້ອມແປງເຄື່ອງເປົ່າຜົມ', amount: 200000 },
+  // Expenses for each branch
+  const expenseTemplates = [
+    { category_id: 1, category: 'Rent', desc_lo: 'ຄ່າເຊົ່າຮ້ານ', desc_en: 'Shop rent', amount: 5000000 },
+    { category_id: 2, category: 'Utilities', desc_lo: 'ຄ່າໄຟຟ້າ', desc_en: 'Electricity', amount: 800000 },
+    { category_id: 2, category: 'Utilities', desc_lo: 'ຄ່ານ້ຳປະປາ', desc_en: 'Water', amount: 150000 },
+    { category_id: 3, category: 'Salary', desc_lo: 'ເງິນເດືອນພະນັກງານ', desc_en: 'Staff salary', amount: 8000000 },
+    { category_id: 4, category: 'Supplies', desc_lo: 'ຊື້ຜ້າເຊັດ, ກະດາດ', desc_en: 'Supplies', amount: 350000 },
   ];
 
-  expenses.forEach(exp => {
-    const dayOffset = -Math.floor(Math.random() * 30);
-    const date = new Date();
-    date.setDate(date.getDate() + dayOffset);
+  branches.forEach(branch_id => {
+    expenseTemplates.forEach(exp => {
+      const dayOffset = -Math.floor(Math.random() * 30);
+      const date = new Date();
+      date.setDate(date.getDate() + dayOffset);
 
-    transactions.push({
-      id: id++,
-      type: 'expense',
-      category_id: exp.category_id,
-      category_name: exp.category,
-      description: exp.desc,
-      amount: exp.amount,
-      payment_method: ['cash', 'transfer'][Math.floor(Math.random() * 2)],
-      reference: `EXP-2025-${String(id).padStart(4, '0')}`,
-      date: date.toISOString().split('T')[0],
-      created_by: 1,
-      created_by_name: 'Admin Demo',
+      transactions.push({
+        id: id++,
+        type: 'expense',
+        category_id: exp.category_id,
+        category_name: exp.category,
+        description: exp.desc_lo,
+        amount: Math.round(exp.amount * (0.8 + Math.random() * 0.4)),
+        payment_method: ['cash', 'transfer'][Math.floor(Math.random() * 2)],
+        reference: `EXP-2025-${String(id).padStart(4, '0')}`,
+        date: date.toISOString().split('T')[0],
+        created_by: 1,
+        created_by_name: 'Admin Demo',
+        branch_id,
+      });
     });
   });
 
-  // Income from bills
+  // Income from bills (inherit branch_id from bill)
   mockBills.forEach(bill => {
     transactions.push({
       id: id++,
@@ -242,6 +276,7 @@ const generateTransactions = () => {
       bill_id: bill.id,
       created_by: 1,
       created_by_name: 'Admin Demo',
+      branch_id: bill.branch_id,
     });
   });
 

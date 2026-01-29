@@ -2,19 +2,19 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore, useDataStore } from '@/lib/store';
+import { useAuthStore, useDataStore, mockBranches } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, Select, PageHeader, SearchInput, EmptyState } from '@/components/ui';
 import { formatNumber, getStatusText } from '@/lib/utils';
-import { Plus, Clock, Phone, User, Calendar, ChevronLeft, ChevronRight, Edit2, Check, X, Play, Receipt, Printer, DollarSign, Wallet, Coins } from 'lucide-react';
+import { Plus, Clock, Phone, User, Calendar, ChevronLeft, ChevronRight, Edit2, Check, X, Play, Receipt, Printer, DollarSign, Wallet, Coins, Building2 } from 'lucide-react';
 
 export default function AppointmentsPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, currentBranch } = useAuthStore();
   const { appointments, customers, services, users, settings, addAppointment, updateAppointment, searchCustomers, bills, addBill, addTransaction } = useDataStore();
   const { locale, t, formatCurrency, currency, setCurrency, availableCurrencies, getCurrencyConfig, convertToLAK } = useI18n();
-
+  
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -22,16 +22,16 @@ export default function AppointmentsPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
-  const [currentBill, setCurrentBill] = useState < any > (null);
-  const [selectedAppointment, setSelectedAppointment] = useState < any > (null);
-  const [editItem, setEditItem] = useState < any > (null);
+  const [currentBill, setCurrentBill] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [editItem, setEditItem] = useState<any>(null);
   const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [paymentCurrency, setPaymentCurrency] = useState < 'LAK' | 'THB' | 'USD' | 'CNY' > ('LAK');
-
+  const [paymentCurrency, setPaymentCurrency] = useState<'LAK' | 'THB' | 'USD' | 'CNY'>('LAK');
+  
   // Form states
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
-  const [searchedCustomers, setSearchedCustomers] = useState < any[] > ([]);
+  const [searchedCustomers, setSearchedCustomers] = useState<any[]>([]);
   const [form, setForm] = useState({
     customer_id: '', customer_name: '', customer_phone: '',
     service_id: '', price: '', discount: '0',
@@ -39,43 +39,62 @@ export default function AppointmentsPage() {
     deposit_amount: '0', deposit_paid: false, deposit_currency: 'LAK' as 'LAK' | 'THB' | 'USD' | 'CNY'
   });
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
-
   const staffList = users.filter(u => u.role === 'staff' && u.is_active);
+
+  // Filter by branch
+  const branchAppointments = useMemo(() => {
+    if (!currentBranch) return [];
+    return appointments.filter((a: any) => a.branch_id === currentBranch.id || !a.branch_id);
+  }, [appointments, currentBranch]);
+
+  // Use ALL customers (not filtered by branch) but show their branch
+  const allCustomers = useMemo(() => customers, [customers]);
 
   useEffect(() => {
     if (customerSearch.length >= 2) {
-      const results = searchCustomers(customerSearch);
+      // Search ALL customers (not filtered by branch)
+      const results = allCustomers.filter((c: any) => 
+        c.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
+        c.phone.includes(customerSearch)
+      ).slice(0, 10);
       setSearchedCustomers(results);
       setShowCustomerDropdown(true);
     } else {
       setSearchedCustomers([]);
       setShowCustomerDropdown(false);
     }
-  }, [customerSearch, searchCustomers]);
+  }, [customerSearch, allCustomers]);
 
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(a => {
+    return branchAppointments.filter((a: any) => {
       const matchSearch = a.customer_name.toLowerCase().includes(search.toLowerCase()) || a.service_name.toLowerCase().includes(search.toLowerCase());
       const matchStatus = !statusFilter || a.status === statusFilter;
       const matchDate = a.appointment_date === selectedDate;
       return matchSearch && matchStatus && matchDate;
-    }).sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
-  }, [appointments, search, statusFilter, selectedDate]);
+    }).sort((a: any, b: any) => a.appointment_time.localeCompare(b.appointment_time));
+  }, [branchAppointments, search, statusFilter, selectedDate]);
 
   const dateStats = useMemo(() => {
-    const dayAppts = appointments.filter(a => a.appointment_date === selectedDate);
+    const dayAppts = branchAppointments.filter((a: any) => a.appointment_date === selectedDate);
     return {
       total: dayAppts.length,
-      pending: dayAppts.filter(a => a.status === 'pending').length,
-      confirmed: dayAppts.filter(a => a.status === 'confirmed').length,
-      in_progress: dayAppts.filter(a => a.status === 'in_progress').length,
-      completed: dayAppts.filter(a => a.status === 'done').length,
-      revenue: dayAppts.filter(a => a.status === 'done').reduce((s, a) => s + a.total_price, 0),
-      totalDeposit: dayAppts.filter(a => a.deposit_paid).reduce((s, a) => s + (a.deposit_amount_lak || 0), 0),
+      pending: dayAppts.filter((a: any) => a.status === 'pending').length,
+      confirmed: dayAppts.filter((a: any) => a.status === 'confirmed').length,
+      in_progress: dayAppts.filter((a: any) => a.status === 'in_progress').length,
+      completed: dayAppts.filter((a: any) => a.status === 'done').length,
+      revenue: dayAppts.filter((a: any) => a.status === 'done').reduce((s: number, a: any) => s + a.total_price, 0),
+      totalDeposit: dayAppts.filter((a: any) => a.deposit_paid).reduce((s: number, a: any) => s + (a.deposit_amount_lak || 0), 0),
     };
-  }, [appointments, selectedDate]);
+  }, [branchAppointments, selectedDate]);
+
+  // Auth redirect effect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const changeDate = (days: number) => {
     const date = new Date(selectedDate);
@@ -105,7 +124,7 @@ export default function AppointmentsPage() {
     const discount = Number(form.discount) || 0;
     const depositAmount = Number(form.deposit_amount) || 0;
     const depositAmountLAK = form.deposit_currency === 'LAK' ? depositAmount : convertToLAK(depositAmount, form.deposit_currency);
-
+    
     const data = {
       customer_id: Number(form.customer_id), customer_name: form.customer_name, customer_phone: form.customer_phone,
       service_id: Number(form.service_id), service_name: service?.name || '', service_name_lo: service?.name_lo || '',
@@ -116,6 +135,7 @@ export default function AppointmentsPage() {
       deposit_amount: depositAmount, deposit_amount_lak: depositAmountLAK,
       deposit_currency: form.deposit_currency, deposit_paid: form.deposit_paid,
       deposit_payment_method: form.deposit_paid ? paymentMethod : null,
+      branch_id: currentBranch.id,
     };
 
     if (editItem) updateAppointment(editItem.id, data);
@@ -149,7 +169,7 @@ export default function AppointmentsPage() {
     const taxAmount = Math.round(afterDiscount * settings.tax_rate / 100);
     const grandTotal = afterDiscount + taxAmount;
     const amountDue = grandTotal - depositPaid;
-
+    
     const bill = {
       id: Math.max(...bills.map((b: any) => b.id), 0) + 1,
       bill_number: `RCP-${new Date().getFullYear()}-${String(bills.length + 1).padStart(5, '0')}`,
@@ -163,7 +183,7 @@ export default function AppointmentsPage() {
       notes: '', created_at: new Date().toISOString().split('T')[0],
       created_time: new Date().toTimeString().substring(0, 5),
     };
-
+    
     updateAppointment(apt.id, { status: 'done' });
     addBill(bill);
     addTransaction({
@@ -246,6 +266,13 @@ ${b.deposit_amount > 0 ? `<div class="row" style="font-size:14px;margin-top:4px"
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader title={t('appointments.title')} subtitle={locale === 'lo' ? 'ຈັດການນັດໝາຍລູກຄ້າ' : 'Manage customer appointments'}
           action={<div className="flex items-center gap-2"><CurrencySelector value={currency} onChange={setCurrency} /><Button icon={<Plus className="w-5 h-5" />} onClick={() => openModal()}>{t('appointments.add')}</Button></div>} />
 
@@ -310,26 +337,26 @@ ${b.deposit_amount > 0 ? `<div class="row" style="font-size:14px;margin-top:4px"
                           {apt.discount > 0 && <p className="text-xs text-red-500">-{formatCurrency(apt.discount)}</p>}
                           {apt.deposit_paid && apt.deposit_amount > 0 && <p className="text-xs text-green-600">{locale === 'lo' ? 'ຄ້າງ' : 'Due'}: {formatCurrency(apt.total_price - (apt.deposit_amount_lak || apt.deposit_amount))}</p>}
                         </div>
-
+                        
                         {apt.status === 'pending' && (<>
                           {apt.deposit_amount > 0 && !apt.deposit_paid && <button onClick={() => openDepositModal(apt)} className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100" title={locale === 'lo' ? 'ຮັບມັດຈຳ' : 'Receive Deposit'}><Wallet className="w-4 h-4" /></button>}
                           <button onClick={() => updateAppointment(apt.id, { status: 'confirmed' })} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100" title={locale === 'lo' ? 'ຢືນຢັນ' : 'Confirm'}><Check className="w-4 h-4" /></button>
                           <button onClick={() => openModal(apt)} className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 className="w-4 h-4 text-gray-500" /></button>
                           <button onClick={() => updateAppointment(apt.id, { status: 'cancelled' })} className="p-2 hover:bg-red-50 rounded-lg"><X className="w-4 h-4 text-red-500" /></button>
                         </>)}
-
+                        
                         {apt.status === 'confirmed' && (<>
                           {apt.deposit_amount > 0 && !apt.deposit_paid && <button onClick={() => openDepositModal(apt)} className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100" title={locale === 'lo' ? 'ຮັບມັດຈຳ' : 'Receive Deposit'}><Wallet className="w-4 h-4" /></button>}
                           <button onClick={() => updateAppointment(apt.id, { status: 'in_progress' })} className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100" title={locale === 'lo' ? 'ເລີ່ມ' : 'Start'}><Play className="w-4 h-4" /></button>
                           <button onClick={() => openModal(apt)} className="p-2 hover:bg-gray-100 rounded-lg"><Edit2 className="w-4 h-4 text-gray-500" /></button>
                           <button onClick={() => updateAppointment(apt.id, { status: 'cancelled' })} className="p-2 hover:bg-red-50 rounded-lg"><X className="w-4 h-4 text-red-500" /></button>
                         </>)}
-
+                        
                         {apt.status === 'in_progress' && (<>
                           <Button size="sm" variant="success" icon={<DollarSign className="w-4 h-4" />} onClick={() => openPaymentModal(apt)}>{locale === 'lo' ? 'ຮັບເງິນ' : 'Payment'}</Button>
                           <button onClick={() => updateAppointment(apt.id, { status: 'cancelled' })} className="p-2 hover:bg-red-50 rounded-lg"><X className="w-4 h-4 text-red-500" /></button>
                         </>)}
-
+                        
                         {apt.status === 'done' && <Button size="sm" variant="secondary" icon={<Receipt className="w-4 h-4" />} onClick={() => viewBill(apt)}>{locale === 'lo' ? 'ໃບເສັດ' : 'Receipt'}</Button>}
                       </div>
                     </div>
@@ -342,52 +369,66 @@ ${b.deposit_amount > 0 ? `<div class="row" style="font-size:14px;margin-top:4px"
 
         {/* Add/Edit Appointment Modal */}
         <Modal isOpen={showModal} onClose={closeModal} title={editItem ? t('common.edit') : t('appointments.add')} size="lg">
-          <div className="space-y-5 p-6 max-h-[70vh] overflow-y-auto">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('appointments.customer')} *</label>
-                <input type="text" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} className="w-full px-4 py-2.5 border rounded-lg" placeholder={locale === 'lo' ? 'ຄົ້ນຫາລູກຄ້າ...' : 'Search customer...'} required />
-                {showCustomerDropdown && searchedCustomers.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {searchedCustomers.map(c => <button key={c.id} type="button" onClick={() => handleSelectCustomer(c)} className="w-full px-4 py-2 text-left hover:bg-gray-50 flex justify-between"><span className="font-medium">{c.name}</span><span className="text-gray-500 text-sm">{c.phone}</span></button>)}
-                  </div>
-                )}
-              </div>
-
-              <Select label={t('appointments.service')} value={form.service_id} onChange={(e) => handleServiceChange(e.target.value)}
-                options={services.filter(s => s.is_active).map(s => ({ value: s.id, label: `${locale === 'lo' ? s.name_lo : s.name} - ${formatCurrency(s.price)}` }))}
-                placeholder={`-- ${locale === 'lo' ? 'ເລືອກບໍລິການ' : 'Select Service'} --`} required />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input label={locale === 'lo' ? 'ລາຄາ' : 'Price'} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-                <Input label={locale === 'lo' ? 'ສ່ວນຫຼຸດ' : 'Discount'} type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} />
-              </div>
-
-              <div className="p-4 bg-purple-50 rounded-xl space-y-3">
-                <div className="flex items-center gap-2 text-purple-700 font-medium"><Wallet className="w-5 h-5" />{locale === 'lo' ? 'ເງິນມັດຈຳ' : 'Deposit'}</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input label={locale === 'lo' ? 'ຈຳນວນມັດຈຳ' : 'Deposit Amount'} type="number" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} />
-                  <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'lo' ? 'ສະກຸນເງິນ' : 'Currency'}</label><CurrencySelector value={form.deposit_currency} onChange={(v: any) => setForm({ ...form, deposit_currency: v })} className="w-full" /></div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('appointments.customer')} *</label>
+              <input type="text" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} className="w-full px-4 py-2.5 border rounded-lg" placeholder={locale === 'lo' ? 'ຄົ້ນຫາລູກຄ້າ...' : 'Search customer...'} required />
+              {showCustomerDropdown && searchedCustomers.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {searchedCustomers.map(c => {
+                    const customerBranch = mockBranches.find(b => b.id === c.branch_id);
+                    return (
+                      <button key={c.id} type="button" onClick={() => handleSelectCustomer(c)} className="w-full px-4 py-2 text-left hover:bg-gray-50 border-b last:border-b-0">
+                        <div className="flex justify-between items-start">
+                          <span className="font-medium">{c.name}</span>
+                          <span className="text-gray-500 text-sm">{c.phone}</span>
+                        </div>
+                        {customerBranch && (
+                          <div className="flex items-center gap-1 mt-1 text-xs text-rose-600">
+                            <Building2 className="w-3 h-3" />
+                            <span>{locale === 'lo' ? customerBranch.name : customerBranch.name_en}</span>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id="deposit_paid" checked={form.deposit_paid} onChange={(e) => setForm({ ...form, deposit_paid: e.target.checked })} className="w-4 h-4 text-purple-600 rounded" />
-                  <label htmlFor="deposit_paid" className="text-sm text-gray-700">{locale === 'lo' ? 'ຈ່າຍມັດຈຳແລ້ວ' : 'Deposit already paid'}</label>
-                </div>
-              </div>
-
-              <Select label={t('appointments.staff')} value={form.staff_id} onChange={(e) => setForm({ ...form, staff_id: e.target.value })}
-                options={staffList.map(s => ({ value: s.id, label: s.full_name }))} placeholder={`-- ${locale === 'lo' ? 'ເລືອກພະນັກງານ' : 'Select Staff'} --`} required />
-
+              )}
+            </div>
+            
+            <Select label={t('appointments.service')} value={form.service_id} onChange={(e) => handleServiceChange(e.target.value)}
+              options={services.filter(s => s.is_active).map(s => ({ value: s.id, label: `${locale === 'lo' ? s.name_lo : s.name} - ${formatCurrency(s.price)}` }))}
+              placeholder={`-- ${locale === 'lo' ? 'ເລືອກບໍລິການ' : 'Select Service'} --`} required />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <Input label={locale === 'lo' ? 'ລາຄາ' : 'Price'} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+              <Input label={locale === 'lo' ? 'ສ່ວນຫຼຸດ' : 'Discount'} type="number" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value })} />
+            </div>
+            
+            <div className="p-4 bg-purple-50 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-purple-700 font-medium"><Wallet className="w-5 h-5" />{locale === 'lo' ? 'ເງິນມັດຈຳ' : 'Deposit'}</div>
               <div className="grid grid-cols-2 gap-4">
-                <Input label={t('appointments.date')} type="date" value={form.appointment_date} onChange={(e) => setForm({ ...form, appointment_date: e.target.value })} required />
-                <Input label={t('appointments.time')} type="time" value={form.appointment_time} onChange={(e) => setForm({ ...form, appointment_time: e.target.value })} required />
+                <Input label={locale === 'lo' ? 'ຈຳນວນມັດຈຳ' : 'Deposit Amount'} type="number" value={form.deposit_amount} onChange={(e) => setForm({ ...form, deposit_amount: e.target.value })} />
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{locale === 'lo' ? 'ສະກຸນເງິນ' : 'Currency'}</label><CurrencySelector value={form.deposit_currency} onChange={(v: any) => setForm({ ...form, deposit_currency: v })} className="w-full" /></div>
               </div>
-
-              <Input label={locale === 'lo' ? 'ໝາຍເຫດ' : 'Notes'} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-
-              <div className="flex gap-3 pt-4"><Button type="button" variant="secondary" className="flex-1" onClick={closeModal}>{t('common.cancel')}</Button><Button type="submit" className="flex-1">{t('common.save')}</Button></div>
-            </form>
-          </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="deposit_paid" checked={form.deposit_paid} onChange={(e) => setForm({ ...form, deposit_paid: e.target.checked })} className="w-4 h-4 text-purple-600 rounded" />
+                <label htmlFor="deposit_paid" className="text-sm text-gray-700">{locale === 'lo' ? 'ຈ່າຍມັດຈຳແລ້ວ' : 'Deposit already paid'}</label>
+              </div>
+            </div>
+            
+            <Select label={t('appointments.staff')} value={form.staff_id} onChange={(e) => setForm({ ...form, staff_id: e.target.value })}
+              options={staffList.map(s => ({ value: s.id, label: s.full_name }))} placeholder={`-- ${locale === 'lo' ? 'ເລືອກພະນັກງານ' : 'Select Staff'} --`} required />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <Input label={t('appointments.date')} type="date" value={form.appointment_date} onChange={(e) => setForm({ ...form, appointment_date: e.target.value })} required />
+              <Input label={t('appointments.time')} type="time" value={form.appointment_time} onChange={(e) => setForm({ ...form, appointment_time: e.target.value })} required />
+            </div>
+            
+            <Input label={locale === 'lo' ? 'ໝາຍເຫດ' : 'Notes'} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            
+            <div className="flex gap-3 pt-4"><Button type="button" variant="secondary" className="flex-1" onClick={closeModal}>{t('common.cancel')}</Button><Button type="submit" className="flex-1">{t('common.save')}</Button></div>
+          </form>
         </Modal>
 
         {/* Deposit Payment Modal */}

@@ -6,11 +6,11 @@ import { useAuthStore, useDataStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
 import SidebarLayout from '@/components/SidebarLayout';
 import { Card, Button, Modal, Badge, Input, PageHeader, SearchInput, EmptyState, StatCard } from '@/components/ui';
-import { Plus, User, Phone, Mail, Edit2, Trash2, Star, Calendar, DollarSign, Users } from 'lucide-react';
+import { Plus, User, Phone, Mail, Edit2, Trash2, Star, Calendar, DollarSign, Users, Building2 } from 'lucide-react';
 
 export default function CustomersPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, currentBranch } = useAuthStore();
   const { customers, appointments, addCustomer, updateCustomer, deleteCustomer } = useDataStore();
   const { locale, t, formatCurrency } = useI18n();
   
@@ -19,37 +19,55 @@ export default function CustomersPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [editItem, setEditItem] = useState<any>(null);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', gender: 'female', notes: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', gender: 'female', notes: '', branch_id: 0 });
 
-  useEffect(() => { if (!isAuthenticated) router.push('/login'); }, [isAuthenticated, router]);
-  if (!isAuthenticated) return null;
+  // Filter by branch
+  const branchCustomers = useMemo(() => {
+    if (!currentBranch) return [];
+    return customers.filter((c: any) => c.branch_id === currentBranch.id || !c.branch_id);
+  }, [customers, currentBranch]);
+
+  const branchAppointments = useMemo(() => {
+    if (!currentBranch) return [];
+    return appointments.filter((a: any) => a.branch_id === currentBranch.id || !a.branch_id);
+  }, [appointments, currentBranch]);
 
   const filtered = useMemo(() => {
-    return customers.filter(c => 
+    return branchCustomers.filter((c: any) => 
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.phone.includes(search) ||
       c.email?.toLowerCase().includes(search.toLowerCase())
     );
-  }, [customers, search]);
+  }, [branchCustomers, search]);
 
   const stats = useMemo(() => ({
-    total: customers.length,
-    totalSpent: customers.reduce((s, c) => s + c.total_spent, 0),
-    avgSpent: customers.length > 0 ? Math.round(customers.reduce((s, c) => s + c.total_spent, 0) / customers.length) : 0,
-    vip: customers.filter(c => c.total_visits >= 10).length,
-  }), [customers]);
+    total: branchCustomers.length,
+    totalSpent: branchCustomers.reduce((s: number, c: any) => s + c.total_spent, 0),
+    avgSpent: branchCustomers.length > 0 ? Math.round(branchCustomers.reduce((s: number, c: any) => s + c.total_spent, 0) / branchCustomers.length) : 0,
+    vip: branchCustomers.filter((c: any) => c.total_visits >= 10).length,
+  }), [branchCustomers]);
+
+  // Auth redirect effect
+  useEffect(() => { 
+    if (!isAuthenticated) router.push('/login'); 
+    else if (!currentBranch) router.push('/select-branch');
+  }, [isAuthenticated, currentBranch, router]);
+  
+  // Early return AFTER all hooks
+  if (!isAuthenticated || !currentBranch) return null;
 
   const getCustomerAppointments = (customerId: number) => {
-    return appointments.filter(a => a.customer_id === customerId)
-      .sort((a, b) => b.appointment_date.localeCompare(a.appointment_date));
+    return branchAppointments.filter((a: any) => a.customer_id === customerId)
+      .sort((a: any, b: any) => b.appointment_date.localeCompare(a.appointment_date));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const data = { ...form, branch_id: currentBranch.id };
     if (editItem) {
-      updateCustomer(editItem.id, form);
+      updateCustomer(editItem.id, data);
     } else {
-      addCustomer(form);
+      addCustomer(data);
     }
     closeModal();
   };
@@ -57,10 +75,10 @@ export default function CustomersPage() {
   const openModal = (item?: any) => {
     if (item) {
       setEditItem(item);
-      setForm({ name: item.name, phone: item.phone, email: item.email || '', gender: item.gender, notes: item.notes || '' });
+      setForm({ name: item.name, phone: item.phone, email: item.email || '', gender: item.gender, notes: item.notes || '', branch_id: item.branch_id || currentBranch.id });
     } else {
       setEditItem(null);
-      setForm({ name: '', phone: '', email: '', gender: 'female', notes: '' });
+      setForm({ name: '', phone: '', email: '', gender: 'female', notes: '', branch_id: currentBranch.id });
     }
     setShowModal(true);
   };
@@ -68,7 +86,7 @@ export default function CustomersPage() {
   const closeModal = () => {
     setShowModal(false);
     setEditItem(null);
-    setForm({ name: '', phone: '', email: '', gender: 'female', notes: '' });
+    setForm({ name: '', phone: '', email: '', gender: 'female', notes: '', branch_id: currentBranch.id });
   };
 
   const openDetail = (customer: any) => {
@@ -79,6 +97,13 @@ export default function CustomersPage() {
   return (
     <SidebarLayout>
       <div className="space-y-6 animate-fadeIn">
+        {/* Branch indicator */}
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Building2 className="w-4 h-4" />
+          <span>{locale === 'lo' ? 'ສາຂາ:' : 'Branch:'}</span>
+          <span className="font-medium text-rose-600">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</span>
+        </div>
+
         <PageHeader
           title={t('customers.title')}
           subtitle={locale === 'lo' ? 'ຈັດການຂໍ້ມູນລູກຄ້າ' : 'Manage customer information'}

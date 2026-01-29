@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuthStore, useDataStore } from '@/lib/store';
+import { useAuthStore, useDataStore, useBranchStore } from '@/lib/store';
 import { useI18n } from '@/contexts/I18nContext';
-import { LayoutDashboard, Calendar, Users, Scissors, Package, Receipt, UserCog, Settings, Bell, LogOut, Menu, X, ChevronDown, BoxesIcon, Sparkles, User, BarChart3, Wallet, Search } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, Package, Receipt, UserCog, Settings, Bell, LogOut, Menu, X, ChevronDown, BoxesIcon, Sparkles, User, BarChart3, Wallet, Search, Building2, RefreshCw } from 'lucide-react';
 
 interface NavItem { href: string; icon: React.ElementType; labelKey: string; labelLo: string; roles?: string[]; }
 
@@ -26,8 +26,9 @@ const navItems: NavItem[] = [
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, logout, currentBranch, clearBranch } = useAuthStore();
   const { notifications } = useDataStore();
+  const { branches } = useBranchStore();
   const { locale, setLocale, currency, setCurrency, availableCurrencies, getCurrencyConfig } = useI18n();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -36,8 +37,12 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const recentNotifs = notifications.slice(0, 5);
   const filteredNav = navItems.filter(item => !item.roles || item.roles.includes(user?.role || ''));
+  
+  // Add branches link for admin
+  const adminNav = user?.role === 'admin' ? [...filteredNav, { href: '/branches', icon: Building2, labelKey: 'Branches', labelLo: 'ສາຂາ', roles: ['admin'] }] : filteredNav;
 
   const handleLogout = () => { logout(); router.push('/login'); };
+  const handleChangeBranch = () => { clearBranch(); router.push('/select-branch'); };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -147,14 +152,23 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
             {/* User Dropdown */}
             {userMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border overflow-hidden animate-fadeIn" onClick={e => e.stopPropagation()}>
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border overflow-hidden animate-fadeIn" onClick={e => e.stopPropagation()}>
                 <div className="px-4 py-3 border-b bg-gray-50">
                   <p className="font-medium text-gray-900">{user?.full_name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
+                {currentBranch && (
+                  <div className="px-4 py-2 border-b bg-rose-50">
+                    <p className="text-xs text-gray-500">{locale === 'lo' ? 'ສາຂາ' : 'Branch'}</p>
+                    <p className="text-sm font-medium text-rose-700">{locale === 'lo' ? currentBranch.name : currentBranch.name_en}</p>
+                  </div>
+                )}
                 <Link href="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700">
                   <User className="w-4 h-4" /> {locale === 'lo' ? 'ໂປຣໄຟລ໌' : 'Profile'}
                 </Link>
+                <button onClick={handleChangeBranch} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700">
+                  <Building2 className="w-4 h-4" /> {locale === 'lo' ? 'ປ່ຽນສາຂາ' : 'Change Branch'}
+                </button>
                 <Link href="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700">
                   <Settings className="w-4 h-4" /> {locale === 'lo' ? 'ຕັ້ງຄ່າ' : 'Settings'}
                 </Link>
@@ -205,10 +219,31 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
           </div>
 
+          {/* Current Branch */}
+          {currentBranch && (
+            <div className="px-4 py-3 border-b bg-gradient-to-r from-rose-50 to-pink-50">
+              <button 
+                onClick={handleChangeBranch}
+                className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-white/50 transition-colors text-left group"
+              >
+                <div className="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500">{locale === 'lo' ? 'ສາຂາປັດຈຸບັນ' : 'Current Branch'}</p>
+                  <p className="font-medium text-gray-900 text-sm truncate">
+                    {locale === 'lo' ? currentBranch.name : currentBranch.name_en}
+                  </p>
+                </div>
+                <RefreshCw className="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors" />
+              </button>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-4 px-3">
             <div className="space-y-1">
-              {filteredNav.map((item) => {
+              {adminNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
